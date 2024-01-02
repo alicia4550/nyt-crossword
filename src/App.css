@@ -1,10 +1,4 @@
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(15, 35px);
-    grid-gap: 0.5rem;
-  }
-
-.grid-container > div {
+.grid-container > label {
     height: 35px;
 }
 
@@ -28,4 +22,12 @@ input {
     text-align: center;
     text-transform: capitalize;
     outline: none;
+}
+
+.clueText {
+    background-color: dodgerblue;
+    font-size: 1.5em;
+    text-align: center;
+    vertical-align: middle;
+    padding: 25px;
 }

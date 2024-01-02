@@ -6,11 +6,9 @@ export default function Crossword(props) {
     const board = props.data.board
 
     const playerBoard = board.map(row => {
-        let rowData = []
-        {row.map(square => {    
-            rowData.push(square === "#" ? "#" : "")
-        })}
-        return rowData
+        return row.map(square => {
+            return square.value === "#" ? "#" : ""
+        })
     })
 
     const [gameState, setGameState] = React.useState({
@@ -25,8 +23,8 @@ export default function Crossword(props) {
 
     const style = {
         display: "grid",
-        gridTemplateCols: `repeat(${props.data.numCols.toString()}, 25px)`,
-        gap: "10px"
+        gridTemplateColumns: `repeat(${props.data.numCols.toString()}, 35px)`,
+        gridGap: "10px"
     }
 
     function handleClick(row, col) {
@@ -40,16 +38,34 @@ export default function Crossword(props) {
                 activeClue: newIsHorizontal ? board[row][col].hClueNum : board[row][col].vClueNum,
                 isHorizontal: newIsHorizontal
             }
-        })        
+        })
     }
 
-    function handleInput(row, col) {
-        // TODO
+    function handleFocus(row, col) {
+        setGameState(prevGameState => {
+            return {
+                ...prevGameState, 
+                activeSquare: {row: row, col: col},
+                activeClue: prevGameState.isHorizontal ? board[row][col].hClueNum : board[row][col].vClueNum,
+            }
+        })
+    }
+
+    function handleInput(event) {
+        const [row, col] = event.target.id.split("-")
+        setGameState(prevGameState => {
+            let newPlayerBoard = [...prevGameState.playerBoard]
+            newPlayerBoard[row][col] = event.target.value.toUpperCase()
+            return {
+                ...prevGameState,
+                playerBoard: newPlayerBoard
+            }
+        })
     }
 
     return (
         <>
-        <div className="grid-container">
+        <div className="grid-container" style={style}>
             {board.map((row, rowIndex) => {
                 return (
                     <>
@@ -70,6 +86,8 @@ export default function Crossword(props) {
                                     isActive={rowIndex === gameState.activeSquare.row && colIndex === gameState.activeSquare.col}
                                     isActiveClue={(gameState.isHorizontal && gameState.activeClue === square.hClueNum) || (!gameState.isHorizontal && gameState.activeClue === square.vClueNum)}
                                     handleClick={handleClick}
+                                    handleInput={handleInput}
+                                    handleFocus={handleFocus}
                                 />
                             )
                         })}
@@ -77,7 +95,7 @@ export default function Crossword(props) {
                 )
             })}
         </div>
-        <div>
+        <div className="clueText" style={{width: ((props.data.numCols * 35) + 90).toString() + "px"}}>
             {gameState.isHorizontal ? 
                 props.data.hClues[board[gameState.activeSquare.row][gameState.activeSquare.col].hClueNum] : 
                 props.data.vClues[board[gameState.activeSquare.row][gameState.activeSquare.col].vClueNum]}

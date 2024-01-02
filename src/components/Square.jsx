@@ -1,11 +1,11 @@
 export default function Square(props) {
     const background = props.isActive ? "dodgerBlue" : (props.isActiveClue ? "lightSkyBlue" : "white")
     return (
-        <div 
+        <label
             style={{backgroundColor: background, color: "black", position: "relative"}}
-            onClick={() => props.handleClick(props.row, props.col)}>
+            onMouseDown={() => props.handleClick(props.row, props.col)}>
                 <p className="clueNumber">{props.clueNum}</p>
-                <input type="text" maxLength="1"/>
-        </div>
+                <input type="text" id={`${props.row}-${props.col}`} maxLength="1" onChange={props.handleInput} onFocus={() => props.handleFocus(props.row, props.col)}/>
+        </label>
     )
 }
