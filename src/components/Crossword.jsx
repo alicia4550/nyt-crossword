@@ -1,3 +1,5 @@
+import React from "react"
+
 import Square from "./Square"
 
 export default function Crossword(props) {
@@ -5,22 +7,23 @@ export default function Crossword(props) {
         display: "grid",
         gridTemplateColumns: `repeat(${props.board[0].length.toString()}, 1fr)`,
         gridTemplateRows: `repeat(${props.board.length.toString()}, 1fr)`,
-        gridGap: "10px"
+        gridGap: "5px"
     }
 
     return (
         <div className="grid-container" style={style}>
             {props.board.map((row, rowIndex) => {
                 return (
-                    <>
+                    <React.Fragment key={"row-"+rowIndex}>
                         {row.map((square, colIndex) => {
                             return (
                                 !square.isInput ? 
-                                <div 
+                                <div key={"col-"+colIndex}
                                     style={{backgroundColor: "black"}}
                                 >
                                 </div> :
                                 <Square
+                                    key={"col-"+colIndex}
                                     isStart={square.isStart} 
                                     clueNum={square.clueNum}
                                     hClueNum={square.hClueNum}
@@ -35,7 +38,7 @@ export default function Crossword(props) {
                                 />
                             )
                         })}
-                    </>
+                    </React.Fragment>
                 )
             })}
         </div>

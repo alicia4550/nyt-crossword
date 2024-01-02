@@ -6,6 +6,8 @@ import ClueHeader from "./components/ClueHeader"
 import Crossword from "./components/Crossword"
 
 import crosswordData from "./crosswordData"
+import ClueSidebar from "./components/ClueSidebar"
+import ByText from "./components/ByText"
 
 export default function App() {
     const board = crosswordData.board
@@ -70,13 +72,27 @@ export default function App() {
                     crosswordData.hClues[board[gameState.activeSquare.row][gameState.activeSquare.col].hClueNum] : 
                     crosswordData.vClues[board[gameState.activeSquare.row][gameState.activeSquare.col].vClueNum]} 
             />
-            <Crossword 
-                board={board}
-                gameState={gameState}
-                handleClick={handleClick}
-                handleInput={handleInput}
-                handleFocus={handleFocus}
-            />
+            <div className="crossword-container">
+                <div>
+                <Crossword 
+                    board={board}
+                    gameState={gameState}
+                    handleClick={handleClick}
+                    handleInput={handleInput}
+                    handleFocus={handleFocus}
+                />
+                <ByText 
+                    title={crosswordData.title}
+                    author={crosswordData.author}
+                />
+                </div>
+                <ClueSidebar 
+                    activeClue={gameState.activeClue}
+                    isHorizontal={gameState.isHorizontal}
+                    hClues={crosswordData.hClues}
+                    vClues={crosswordData.vClues}
+                />
+            </div>
         </>
     )
 }

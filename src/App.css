@@ -1,6 +1,16 @@
+#root {
+    background-color: white;
+    color: black;
+}
+
+.crossword-container {
+    display: flex;
+}
+
 .grid-container {
-    width: 665px;
-    height: 665px;
+    width: 550px;
+    height: 550px;
+    background-color: black;
 }
 
 .clueNumber {
@@ -16,9 +26,9 @@ input {
     background-color: transparent;
     position: absolute;
     top: 0%;
-    left: -4%;
+    left: -5%;
     border: none;
-    font-size: 2em;
+    font-size: 1.75em;
     color: black;
     text-align: center;
     text-transform: capitalize;
@@ -26,9 +36,32 @@ input {
 }
 
 .clueText {
-    background-color: dodgerblue;
+    background-color: lightskyblue;
     font-size: 1.5em;
     text-align: center;
     vertical-align: middle;
     padding: 25px;
+}
+
+.clue-sidebar {
+    width: 550px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.clue-list {
+    width: 250px;
+}
+
+.clue-list-heading {
+    height: 75px;
+}
+
+.clue-list-body {
+    height: 525px;
+    overflow-y: scroll;
+}
+
+.byText {
+    text-align: center;
 }
