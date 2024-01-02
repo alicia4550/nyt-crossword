@@ -1,8 +1,20 @@
-# React + Vite
+# NYT Crossword Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a clone of the New York Times crossword website.
 
-Currently, two official plugins are available:
+## Usage
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Clone the project using 
+```
+git clone https://github.com/alicia4550/nyt-crossword.git
+```
+
+2. Navigate to the project's root directory.
+
+3. Run the following commands:
+```
+npm install
+npm run dev
+```
+
+4. Open `http://localhost:5173/` in your local browser.
