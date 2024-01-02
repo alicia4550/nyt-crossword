@@ -57,6 +57,21 @@ input {
     height: 75px;
 }
 
+.clue-text-container {
+    display: "flex";
+    width: 100%;
+    border-radius: 0px;
+    border-style: none none none solid;
+    border-width: 3px;
+    color: black;
+    text-align: left;
+}
+
+.clue-text-container:hover, .clue-text-container:focus {
+    outline: none;
+    border-color: dodgerblue;
+}
+
 .clue-list-body {
     height: 525px;
     overflow-y: scroll;

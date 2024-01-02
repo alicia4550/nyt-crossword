@@ -67,6 +67,28 @@ export default function App() {
         })
     }
 
+    function handleClueClick(index, isHorizontal) {
+        if (isHorizontal) {
+            setGameState(prevGameState => {
+                return {
+                    ...prevGameState,
+                    activeSquare: crosswordData.hClues[index].firstSquare,
+                    activeClue: index,
+                    isHorizontal: true
+                }
+            })
+        } else {
+            setGameState(prevGameState => {
+                return {
+                    ...prevGameState,
+                    activeSquare: crosswordData.vClues[index].firstSquare,
+                    activeClue: index,
+                    isHorizontal: false
+                }
+            })
+        }
+    }
+
     React.useEffect(() => {
         if (gameState.isHorizontal) {
             hClueRef.current[gameState.activeClue].scrollIntoView()
@@ -104,6 +126,7 @@ export default function App() {
                     vClues={crosswordData.vClues}
                     hClueRef={hClueRef}
                     vClueRef={vClueRef}
+                    handleClick={handleClueClick}
                 />
             </div>
         </>

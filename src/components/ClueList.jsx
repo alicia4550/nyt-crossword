@@ -17,6 +17,8 @@ export default function ClueList(props) {
                             text={clue.clueText}
                             clueRef={props.clueRef}
                             index={index}
+                            isHorizontal={props.headingText === "ACROSS"}
+                            handleClick={props.handleClick}
                         />
                     )
                 })}

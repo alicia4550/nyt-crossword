@@ -9,6 +9,7 @@ export default function ClueSidebar(props) {
                 headingText="ACROSS"
                 clues={props.hClues}
                 clueRef={props.hClueRef}
+                handleClick={props.handleClick}
             />
             <ClueList 
                 activeClue={props.activeClue}
@@ -16,6 +17,7 @@ export default function ClueSidebar(props) {
                 headingText="DOWN"
                 clues={props.vClues} 
                 clueRef={props.vClueRef}
+                handleClick={props.handleClick}
             />
         </div>
     )

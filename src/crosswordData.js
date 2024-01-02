@@ -159,11 +159,19 @@ board.map((row, rowIndex) => {
 
             hClues.push({
                 clueNum: clueNum,
-                clueText: hCluesText[hClueCount]
+                clueText: hCluesText[hClueCount],
+                firstSquare: {
+                    row: rowIndex,
+                    col: colIndex
+                }
             })
             vClues.push({
                 clueNum: clueNum,
-                clueText: vCluesText[vClueCount]
+                clueText: vCluesText[vClueCount],
+                firstSquare: {
+                    row: rowIndex,
+                    col: colIndex
+                }
             })
         }
         else if (isVStart) {
@@ -172,7 +180,11 @@ board.map((row, rowIndex) => {
 
             vClues.push({
                 clueNum: clueNum,
-                clueText: vCluesText[vClueCount]
+                clueText: vCluesText[vClueCount],
+                firstSquare: {
+                    row: rowIndex,
+                    col: colIndex
+                }
             })
         }
         else if (isHStart) {
@@ -181,7 +193,11 @@ board.map((row, rowIndex) => {
 
             hClues.push({
                 clueNum: clueNum,
-                clueText: hCluesText[hClueCount]
+                clueText: hCluesText[hClueCount],
+                firstSquare: {
+                    row: rowIndex,
+                    col: colIndex
+                }
             })
         }
 

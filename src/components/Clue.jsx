@@ -1,15 +1,17 @@
 export default function Clue(props) {
     const style = {
         backgroundColor: props.isActive ? "lightSkyBlue" : "transparent",
-        display: "flex"
+        borderColor: props.isActive ? "dodgerBlue" : "white"
     }
 
     return (
-        <div 
+        <button 
+            className="clue-text-container"
             style={style}
             ref={el => props.clueRef.current[props.index] = el}
+            onClick={()=>props.handleClick(props.index, props.isHorizontal)}
         >
             <b>{props.num}</b>. {props.text}
-        </div>
+        </button>
     )
 }
