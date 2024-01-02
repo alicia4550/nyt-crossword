@@ -1,0 +1,31 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(15, 35px);
+    grid-gap: 0.5rem;
+  }
+
+.grid-container > div {
+    height: 35px;
+}
+
+.clueNumber {
+    margin-top: 0px;
+    text-align: left;
+    font-size: 0.5em;
+    font-weight: bold;
+}
+
+input {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    position: absolute;
+    top: 5px;
+    left: 3px;
+    border: none;
+    font-size: 2em;
+    color: black;
+    text-align: center;
+    text-transform: capitalize;
+    outline: none;
+}
