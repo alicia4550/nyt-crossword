@@ -9,6 +9,7 @@ export default function Square(props) {
                     type="text" id={`${props.row}-${props.col}`} 
                     maxLength="1" onChange={props.handleInput} 
                     onFocus={() => props.handleFocus(props.row, props.col)}
+                    onKeyDown={(event) => props.handleBackspace(event, props.row, props.col)}
                     ref={(el) => {
                         props.boardRef.current[props.row] = props.boardRef.current[props.row] || [];
                         props.boardRef.current[props.row][props.col] = el;

@@ -36,11 +36,12 @@ export default function App() {
         setGameState(prevGameState => {
             let toggleIsHorizontal = row === prevGameState.activeSquare.row && col === prevGameState.activeSquare.col
             let newIsHorizontal = toggleIsHorizontal ? !prevGameState.isHorizontal : prevGameState.isHorizontal
+            let clueNum = newIsHorizontal ? "hClueNum" : "vClueNum"
             
             return {
                 ...prevGameState,
                 isHorizontal: newIsHorizontal,
-                activeClue: newIsHorizontal ? board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].hClueNum : board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].vClueNum
+                activeClue: board[prevGameState.activeSquare.row][prevGameState.activeSquare.col][clueNum]
             }
         })
     }
@@ -89,6 +90,45 @@ export default function App() {
         }
     }
 
+    function handleBackspace(event, row, col) {
+        if (event.keyCode === 8) {
+            setGameState(prevGameState => {
+                if (prevGameState.playerBoard[row][col] == "") {
+                    let clues = prevGameState.isHorizontal ? crosswordData.hClues : crosswordData.vClues
+                    if (prevGameState.activeSquare.row === clues[prevGameState.activeClue].firstSquare.row
+                        && prevGameState.activeSquare.col === clues[prevGameState.activeClue].firstSquare.col) {
+                            return {...prevGameState}
+                        }
+                    if (prevGameState.isHorizontal) {
+                        const prevPlayerBoard = [...gameState.playerBoard]
+                        prevPlayerBoard[row][col-1] = ""
+                        return {
+                            ...prevGameState,
+                            playerBoard: prevPlayerBoard,
+                            activeSquare: {
+                                row: row,
+                                col: col-1
+                            }
+                        }
+                    } else {
+                        const prevPlayerBoard = [...gameState.playerBoard]
+                        prevPlayerBoard[row-1][col] = ""
+                        return {
+                            ...prevGameState,
+                            playerBoard: prevPlayerBoard,
+                            activeSquare: {
+                                row: row-1,
+                                col: col
+                            }
+                        }
+                    }
+                } else {
+                    return {...prevGameState}
+                }
+            })
+        }
+    }
+
     React.useEffect(() => {
         if (gameState.isHorizontal) {
             hClueRef.current[gameState.activeClue].scrollIntoView()
@@ -100,9 +140,10 @@ export default function App() {
     React.useEffect(() => {
         boardRef.current[gameState.activeSquare.row][gameState.activeSquare.col].focus()
         setGameState(prevGameState => {
+            let clueNum = prevGameState.isHorizontal ? "hClueNum" : "vClueNum"
             return {
                 ...prevGameState,
-                activeClue: prevGameState.isHorizontal ? board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].hClueNum : board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].vClueNum
+                activeClue: board[prevGameState.activeSquare.row][prevGameState.activeSquare.col][clueNum]
             }
         })
     }, [gameState.activeSquare])
@@ -166,6 +207,7 @@ export default function App() {
                     handleClick={handleClick}
                     handleInput={handleInput}
                     handleFocus={handleFocus}
+                    handleBackspace={handleBackspace}
                     boardRef={boardRef}
                 />
                 <ByText 

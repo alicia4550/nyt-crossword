@@ -35,6 +35,7 @@ export default function Crossword(props) {
                                     handleClick={props.handleClick}
                                     handleInput={props.handleInput}
                                     handleFocus={props.handleFocus}
+                                    handleBackspace={props.handleBackspace}
                                     boardRef={props.boardRef}
                                 />
                             )
