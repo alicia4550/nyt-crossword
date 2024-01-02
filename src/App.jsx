@@ -65,7 +65,8 @@ export default function App() {
     return (
         <>
             <ClueHeader 
-                clueText={gameState.isHorizontal ? 
+                isHorizontal={gameState.isHorizontal}
+                clue={gameState.isHorizontal ? 
                     crosswordData.hClues[board[gameState.activeSquare.row][gameState.activeSquare.col].hClueNum] : 
                     crosswordData.vClues[board[gameState.activeSquare.row][gameState.activeSquare.col].vClueNum]} 
             />

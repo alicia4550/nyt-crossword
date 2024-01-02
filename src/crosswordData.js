@@ -123,25 +123,27 @@ const numHClues = parseInt(splitString[12])
 const numVClues = parseInt(splitString[14])
 
 let board = []
-let vClues = []
-let hClues = []
+let hCluesText = []
+let vCluesText = []
 
 for (let i = 0; i < rows; i++) {
     board.push(splitString[16+i].split(''))
 }
 
 for (let i = 0; i < numHClues; i++) {
-    hClues.push(splitString[17+rows+i])
+    hCluesText.push(splitString[17+rows+i])
 }
 
 for (let i = 0; i < numVClues; i++) {
-    vClues.push(splitString[18+rows+numHClues+i])
+    vCluesText.push(splitString[18+rows+numHClues+i])
 }
 
 let clueNum = 0
 let hClueCount = -1
 let vClueCount = -1
 let boardData = []
+let hClues = []
+let vClues = []
 
 board.map((row, rowIndex) => {
     let rowData = []
@@ -154,14 +156,33 @@ board.map((row, rowIndex) => {
             clueNum++
             hClueCount++
             vClueCount++
+
+            hClues.push({
+                clueNum: clueNum,
+                clueText: hCluesText[hClueCount]
+            })
+            vClues.push({
+                clueNum: clueNum,
+                clueText: vCluesText[vClueCount]
+            })
         }
         else if (isVStart) {
             clueNum++
             vClueCount++
+
+            vClues.push({
+                clueNum: clueNum,
+                clueText: vCluesText[vClueCount]
+            })
         }
         else if (isHStart) {
             clueNum++
             hClueCount++
+
+            hClues.push({
+                clueNum: clueNum,
+                clueText: hCluesText[hClueCount]
+            })
         }
 
         rowData.push(
@@ -182,10 +203,6 @@ export default {
     id: id,
     title: title,
     author: author,
-    numRows: rows,
-    numCols: cols,
-    numHClues: numHClues,
-    numVClues: numVClues,
     board: boardData,
     hClues: hClues,
     vClues: vClues
