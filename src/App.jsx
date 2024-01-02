@@ -28,6 +28,9 @@ export default function App() {
         playerBoard: playerBoard
     })
 
+    const hClueRef = React.useRef([])
+    const vClueRef = React.useRef([])
+
     function handleClick(row, col) {
         setGameState(prevGameState => {
             let toggleIsHorizontal = row === prevGameState.activeSquare.row && col === prevGameState.activeSquare.col
@@ -64,6 +67,14 @@ export default function App() {
         })
     }
 
+    React.useEffect(() => {
+        if (gameState.isHorizontal) {
+            hClueRef.current[gameState.activeClue].scrollIntoView()
+        } else {
+            vClueRef.current[gameState.activeClue].scrollIntoView()
+        }
+    }, [gameState.activeClue])
+
     return (
         <>
             <ClueHeader 
@@ -91,6 +102,8 @@ export default function App() {
                     isHorizontal={gameState.isHorizontal}
                     hClues={crosswordData.hClues}
                     vClues={crosswordData.vClues}
+                    hClueRef={hClueRef}
+                    vClueRef={vClueRef}
                 />
             </div>
         </>

@@ -15,6 +15,8 @@ export default function ClueList(props) {
                             isActive={props.isActive && props.activeClue === index}
                             num={clue.clueNum}
                             text={clue.clueText}
+                            clueRef={props.clueRef}
+                            index={index}
                         />
                     )
                 })}

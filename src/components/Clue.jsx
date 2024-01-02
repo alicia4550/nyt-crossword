@@ -3,8 +3,12 @@ export default function Clue(props) {
         backgroundColor: props.isActive ? "lightSkyBlue" : "transparent",
         display: "flex"
     }
+
     return (
-        <div style={style}>
+        <div 
+            style={style}
+            ref={el => props.clueRef.current[props.index] = el}
+        >
             <b>{props.num}</b>. {props.text}
         </div>
     )
