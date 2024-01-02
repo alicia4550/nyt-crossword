@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 
 import './App.css'
 
@@ -30,6 +30,7 @@ export default function App() {
 
     const hClueRef = React.useRef([])
     const vClueRef = React.useRef([])
+    const boardRef = React.useRef([])
 
     function handleClick(row, col) {
         setGameState(prevGameState => {
@@ -37,10 +38,9 @@ export default function App() {
             let newIsHorizontal = toggleIsHorizontal ? !prevGameState.isHorizontal : prevGameState.isHorizontal
             
             return {
-                ...prevGameState, 
-                activeSquare: {row: row, col: col},
-                activeClue: newIsHorizontal ? board[row][col].hClueNum : board[row][col].vClueNum,
-                isHorizontal: newIsHorizontal
+                ...prevGameState,
+                isHorizontal: newIsHorizontal,
+                activeClue: newIsHorizontal ? board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].hClueNum : board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].vClueNum
             }
         })
     }
@@ -49,8 +49,7 @@ export default function App() {
         setGameState(prevGameState => {
             return {
                 ...prevGameState, 
-                activeSquare: {row: row, col: col},
-                activeClue: prevGameState.isHorizontal ? board[row][col].hClueNum : board[row][col].vClueNum,
+                activeSquare: {row: row, col: col}
             }
         })
     }
@@ -60,9 +59,12 @@ export default function App() {
         setGameState(prevGameState => {
             let newPlayerBoard = [...prevGameState.playerBoard]
             newPlayerBoard[row][col] = event.target.value.toUpperCase()
+            let newActiveSquare = prevGameState.isHorizontal ? getNextHorizontalSquare(prevGameState) : getNextVerticalSquare(prevGameState)
+
             return {
                 ...prevGameState,
-                playerBoard: newPlayerBoard
+                playerBoard: newPlayerBoard,
+                activeSquare: newActiveSquare
             }
         })
     }
@@ -73,7 +75,6 @@ export default function App() {
                 return {
                     ...prevGameState,
                     activeSquare: crosswordData.hClues[index].firstSquare,
-                    activeClue: index,
                     isHorizontal: true
                 }
             })
@@ -82,7 +83,6 @@ export default function App() {
                 return {
                     ...prevGameState,
                     activeSquare: crosswordData.vClues[index].firstSquare,
-                    activeClue: index,
                     isHorizontal: false
                 }
             })
@@ -96,6 +96,59 @@ export default function App() {
             vClueRef.current[gameState.activeClue].scrollIntoView()
         }
     }, [gameState.activeClue])
+
+    React.useEffect(() => {
+        boardRef.current[gameState.activeSquare.row][gameState.activeSquare.col].focus()
+        setGameState(prevGameState => {
+            return {
+                ...prevGameState,
+                activeClue: prevGameState.isHorizontal ? board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].hClueNum : board[prevGameState.activeSquare.row][prevGameState.activeSquare.col].vClueNum
+            }
+        })
+    }, [gameState.activeSquare])
+
+    function getNextHorizontalSquare(prevGameState) {
+        let currentRow = prevGameState.activeSquare.row
+        let currentCol = prevGameState.activeSquare.col
+
+        while (prevGameState.playerBoard[currentRow][currentCol] != "") {
+            if (currentCol + 1 === prevGameState.playerBoard[0].length) {
+                currentRow = currentRow + 1 === prevGameState.playerBoard.length ? 0 : currentRow + 1
+                currentCol = 0
+                continue
+            } else {
+                currentCol++
+            }
+        }
+
+        return {
+            row: currentRow,
+            col: currentCol
+        }
+    }
+
+    function getNextVerticalSquare(gameState){
+        let currentRow = gameState.activeSquare.row
+        let currentCol = gameState.activeSquare.col
+        let currentClue = gameState.activeClue
+
+        const playerBoard = gameState.playerBoard
+
+        while (playerBoard[currentRow][currentCol] != "") {
+            if (playerBoard[currentRow][currentCol] === "#" || currentRow + 1 === playerBoard.length) {
+                currentClue = crosswordData.vClues.length - 1 ? 0 : currentClue + 1
+                currentRow = crosswordData.vClues[currentClue].firstSquare.row
+                currentCol = crosswordData.vClues[currentClue].firstSquare.col
+            } else {
+                currentRow++
+            }
+        }
+
+        return {
+            row: currentRow,
+            col: currentCol
+        }
+    }
 
     return (
         <>
@@ -113,6 +166,7 @@ export default function App() {
                     handleClick={handleClick}
                     handleInput={handleInput}
                     handleFocus={handleFocus}
+                    boardRef={boardRef}
                 />
                 <ByText 
                     title={crosswordData.title}
