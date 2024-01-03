@@ -10,18 +10,22 @@ export default function ActionsHeader(props) {
     return (
         <nav>
             <div style={{float: "left"}}>
-                <Dropdown 
-                    label={
-                        <FontAwesome
-                            name='bars'
-                            size='2x'
-                        />
-                    }
-                    menuOptions={["Save", "Clear"]}
-                    func1={() => test("Save")}
-                    func2={props.clearBoard}
-                />
-                <div className="nav-item" style={{fontSize: "1.5em"}}>0:00:00</div>
+                <div style={{float: "left"}}>
+                    <Dropdown 
+                        label={
+                            <FontAwesome
+                                name='bars'
+                                size='2x'
+                            />
+                        }
+                        menuOptions={["Save", "Clear"]}
+                        func1={() => test("Save")}
+                        func2={props.clearBoard}
+                    />
+                </div>
+                <div style={{float: "left", width: "100px", marginTop: "8px", textAlign: "center"}}>
+                    <div className="nav-item" style={{fontSize: "1.5em"}}>{props.timer.time.hours}:{props.timer.time.mins.toString().padStart(2, "0")}:{props.timer.time.secs.toString().padStart(2, "0")}</div>
+                </div>
                 <button className="nav-item">
                     <FontAwesome
                         name='user-plus'
@@ -39,7 +43,7 @@ export default function ActionsHeader(props) {
                         func3={props.revealGrid}
                     />
                 </div>
-                <div className="nav-item" style={{float: "left", height: "40px", marginTop: "7px"}}>
+                <div className="nav-item" style={{float: "left", height: "50px", marginTop: "7px"}}>
                     <Dropdown 
                         label="Check"
                         menuOptions={["Check letter", "Check word", "Check grid"]}

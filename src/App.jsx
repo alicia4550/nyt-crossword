@@ -36,6 +36,15 @@ export default function App() {
         boardStyling: boardStyling
     })
 
+    const [timer, setTimer] = React.useState({
+        start: null,
+        time: {
+            hours: 0,
+            mins: 0,
+            secs: 0
+        }
+    })
+
     const hClueRef = React.useRef([])
     const vClueRef = React.useRef([])
     const boardRef = React.useRef([])
@@ -64,6 +73,15 @@ export default function App() {
     }
 
     function handleInput(event) {
+        if (timer.start === null) {
+            setTimer(prevTimer => {
+                const now = Date.now()
+                return {
+                    ...prevTimer,
+                    start: now
+                }
+            })
+        }
         const [row, col] = event.target.id.split("-")
         setGameState(prevGameState => {
             let newPlayerBoard = [...prevGameState.playerBoard]
@@ -362,9 +380,35 @@ export default function App() {
         })
     }
 
+    function getTime() {
+        const time = Date.now() - timer.start;
+    
+        const hours = timer.start === null? 0 : Math.floor((time / (1000 * 60 * 60)) % 24)
+        const mins = timer.start === null? 0 : Math.floor((time / 1000 / 60) % 60)
+        const secs = timer.start === null? 0 : Math.floor((time / 1000) % 60)
+
+        setTimer(prevTimer => {
+            return {
+                ...prevTimer,
+                time: {
+                    hours: hours,
+                    mins: mins,
+                    secs: secs
+                }
+            }
+        })
+      };
+
+    React.useEffect(() => {
+        const interval = setInterval(() => getTime(), 1000);
+    
+        return () => clearInterval(interval);
+    }, [timer.start]);
+
     return (
         <>
             <ActionsHeader
+                timer={timer}
                 clearBoard={clearBoard}
                 revealLetter={revealLetter}
                 revealWord={revealWord}
