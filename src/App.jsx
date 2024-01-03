@@ -8,6 +8,7 @@ import Crossword from "./components/Crossword"
 import crosswordData from "./crosswordData"
 import ClueSidebar from "./components/ClueSidebar"
 import ByText from "./components/ByText"
+import ActionsHeader from "./components/ActionsHeader"
 
 export default function App() {
     const board = crosswordData.board
@@ -18,6 +19,12 @@ export default function App() {
         })
     })
 
+    const boardStyling = board.map(row => {
+        return row.map(square => {
+            return "black"
+        })
+    })
+
     const [gameState, setGameState] = React.useState({
         activeSquare: {
             row: 0,
@@ -25,7 +32,8 @@ export default function App() {
         },
         activeClue: 0,
         isHorizontal: true,
-        playerBoard: playerBoard
+        playerBoard: playerBoard,
+        boardStyling: boardStyling
     })
 
     const hClueRef = React.useRef([])
@@ -60,6 +68,8 @@ export default function App() {
         setGameState(prevGameState => {
             let newPlayerBoard = [...prevGameState.playerBoard]
             newPlayerBoard[row][col] = event.target.value.toUpperCase()
+            let newBoardStyling = [...prevGameState.boardStyling]
+            newBoardStyling[row][col] = "black"
             let newActiveSquare = prevGameState.isHorizontal ? getNextHorizontalSquare(prevGameState) : getNextVerticalSquare(prevGameState)
 
             return {
@@ -160,6 +170,7 @@ export default function App() {
             } else {
                 currentCol++
             }
+            if (currentRow === gameState.activeSquare.row && currentCol === gameState.activeSquare.col) break
         }
 
         return {
@@ -183,6 +194,7 @@ export default function App() {
             } else {
                 currentRow++
             }
+            if (currentRow === gameState.activeSquare.row && currentCol === gameState.activeSquare.col) break
         }
 
         return {
@@ -191,8 +203,175 @@ export default function App() {
         }
     }
 
+    function clearBoard() {
+        setGameState(prevGameState => {
+            return {
+                ...prevGameState,
+                playerBoard: playerBoard,
+                boardStyling: boardStyling
+            }
+        })
+    }
+
+    function revealLetter() {
+        const row = gameState.activeSquare.row
+        const col = gameState.activeSquare.col
+        setGameState(prevGameState => {
+            let newPlayerBoard = [...prevGameState.playerBoard]
+            newPlayerBoard[row][col] = board[row][col].value
+            let newBoardStyling = [...prevGameState.boardStyling]
+            newBoardStyling[row][col] = "green"
+            return {
+                ...prevGameState,
+                playerBoard: newPlayerBoard,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
+    function revealWord() {
+        setGameState(prevGameState => {
+            let newPlayerBoard = [...prevGameState.playerBoard]
+            let newBoardStyling = [...prevGameState.boardStyling]
+
+            let row = gameState.activeSquare.row
+            let col = gameState.activeSquare.col
+
+            if (prevGameState.isHorizontal) {
+                while (col >= 0 && newPlayerBoard[row][col] != "#") {
+                    newPlayerBoard[row][col] = board[row][col].value
+                    newBoardStyling[row][col] = "green"
+                    col--
+                } 
+                col = gameState.activeSquare.col
+                while (col < board[0].length && newPlayerBoard[row][col] != "#") {
+                    newPlayerBoard[row][col] = board[row][col].value
+                    newBoardStyling[row][col] = "green"
+                    col++
+                } 
+            } else {
+                while (row >= 0 && newPlayerBoard[row][col] != "#") {
+                    newPlayerBoard[row][col] = board[row][col].value
+                    newBoardStyling[row][col] = "green"
+                    row--
+                } 
+                row = gameState.activeSquare.row
+                while (row < board[0].length && newPlayerBoard[row][col] != "#") {
+                    newPlayerBoard[row][col] = board[row][col].value
+                    newBoardStyling[row][col] = "green"
+                    row++
+                } 
+            }
+
+            return {
+                ...prevGameState,
+                playerBoard: newPlayerBoard,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
+    function revealGrid() {
+        setGameState(prevGameState => {
+            let newPlayerBoard = board.map(row => {
+                return row.map(square => {
+                    return square.value
+                })
+            })
+            let newBoardStyling = board.map(row => {
+                return row.map(square => {
+                    return "green"
+                })
+            })
+            return {
+                ...prevGameState,
+                playerBoard: newPlayerBoard,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
+    function checkLetter() {
+        const row = gameState.activeSquare.row
+        const col = gameState.activeSquare.col
+        setGameState(prevGameState => {
+            let newBoardStyling = [...prevGameState.boardStyling]
+            newBoardStyling[row][col] = prevGameState.playerBoard[row][col] != board[row][col].value ? "red" : prevGameState.boardStyling[row][col]
+            return {
+                ...prevGameState,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
+    function checkWord() {
+        setGameState(prevGameState => {
+            let newBoardStyling = [...prevGameState.boardStyling]
+
+            let row = gameState.activeSquare.row
+            let col = gameState.activeSquare.col
+
+            if (prevGameState.isHorizontal) {
+                while (col >= 0 && gameState.playerBoard[row][col] != "#") {
+                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                        newBoardStyling[row][col] = "red"
+                    }
+                    col--
+                } 
+                col = gameState.activeSquare.col
+                while (col < board[0].length && gameState.playerBoard[row][col] != "#") {
+                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                        newBoardStyling[row][col] = "red"
+                    }
+                    col++
+                } 
+            } else {
+                while (row >= 0 && gameState.playerBoard[row][col] != "#") {
+                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                        newBoardStyling[row][col] = "red"
+                    }
+                    row--
+                } 
+                row = gameState.activeSquare.row
+                while (row < board[0].length && gameState.playerBoard[row][col] != "#") {
+                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                        newBoardStyling[row][col] = "red"
+                    }
+                    row++
+                } 
+            }
+
+            return {
+                ...prevGameState,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
+    function checkGrid() {
+        setGameState(prevGameState => {
+            let newBoardStyling = prevGameState.playerBoard.map((row, rowIndex) => {
+                return row.map((square, colIndex) => {
+                    return (square != board[rowIndex][colIndex].value && square != "") ? "red" : prevGameState.boardStyling[rowIndex][colIndex]
+                })
+            })
+            return {
+                ...prevGameState,
+                boardStyling: newBoardStyling
+            }
+        })
+    }
+
     return (
         <>
+            <ActionsHeader
+                clearBoard={clearBoard}
+                revealLetter={revealLetter}
+                revealWord={revealWord}
+                revealGrid={revealGrid}
+                checkLetter={checkLetter}
+                checkWord={checkWord}
+                checkGrid={checkGrid} />
             <ClueHeader 
                 isHorizontal={gameState.isHorizontal}
                 clue={gameState.isHorizontal ? 

@@ -24,6 +24,7 @@ export default function Crossword(props) {
                                 </div> :
                                 <Square
                                     key={"col-"+colIndex}
+                                    input={props.gameState.playerBoard[rowIndex][colIndex]}
                                     isStart={square.isStart} 
                                     clueNum={square.clueNum}
                                     hClueNum={square.hClueNum}
@@ -37,6 +38,7 @@ export default function Crossword(props) {
                                     handleFocus={props.handleFocus}
                                     handleBackspace={props.handleBackspace}
                                     boardRef={props.boardRef}
+                                    textColour={props.gameState.boardStyling[rowIndex][colIndex]}
                                 />
                             )
                         })}
