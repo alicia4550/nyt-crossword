@@ -177,7 +177,7 @@ export default function App() {
 
         while (playerBoard[currentRow][currentCol] != "") {
             if (playerBoard[currentRow][currentCol] === "#" || currentRow + 1 === playerBoard.length) {
-                currentClue = crosswordData.vClues.length - 1 ? 0 : currentClue + 1
+                currentClue = currentClue === crosswordData.vClues.length - 1 ? 0 : currentClue + 1
                 currentRow = crosswordData.vClues[currentClue].firstSquare.row
                 currentCol = crosswordData.vClues[currentClue].firstSquare.col
             } else {
