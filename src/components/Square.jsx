@@ -15,8 +15,9 @@ export default function Square(props) {
                     ref={(el) => {
                         props.boardRef.current[props.row] = props.boardRef.current[props.row] || [];
                         props.boardRef.current[props.row][props.col] = el;
-                      }}
-                    />
+                    }}
+                    disabled={props.win}
+                />
         </label>
     )
 }

@@ -9,6 +9,7 @@ import crosswordData from "./crosswordData"
 import ClueSidebar from "./components/ClueSidebar"
 import ByText from "./components/ByText"
 import ActionsHeader from "./components/ActionsHeader"
+import WinModal from "./components/WinModal"
 
 export default function App() {
     const board = crosswordData.board
@@ -44,6 +45,8 @@ export default function App() {
             secs: 0
         }
     })
+
+    const[win, setWin] = React.useState(false)
 
     const hClueRef = React.useRef([])
     const vClueRef = React.useRef([])
@@ -383,11 +386,11 @@ export default function App() {
     function getTime() {
         const time = Date.now() - timer.start;
     
-        const hours = timer.start === null? 0 : Math.floor((time / (1000 * 60 * 60)) % 24)
-        const mins = timer.start === null? 0 : Math.floor((time / 1000 / 60) % 60)
-        const secs = timer.start === null? 0 : Math.floor((time / 1000) % 60)
-
         setTimer(prevTimer => {
+            const hours = timer.start === null? prevTimer.time.hours : Math.floor((time / (1000 * 60 * 60)) % 24)
+            const mins = timer.start === null? prevTimer.time.mins : Math.floor((time / 1000 / 60) % 60)
+            const secs = timer.start === null? prevTimer.time.secs : Math.floor((time / 1000) % 60)
+
             return {
                 ...prevTimer,
                 time: {
@@ -404,6 +407,27 @@ export default function App() {
     
         return () => clearInterval(interval);
     }, [timer.start]);
+
+    React.useEffect(() => {
+        let win = true
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[0].length; j++) {
+                if (gameState.playerBoard[i][j] != board[i][j].value) {
+                    win = false
+                    break
+                }
+            }
+        }
+        if (win) {
+            setWin(true)
+            setTimer(prevTimer => {
+                return {
+                    ...prevTimer,
+                    start: null
+                }
+            })
+        }
+    }, [gameState.playerBoard])
 
     return (
         <>
@@ -432,6 +456,7 @@ export default function App() {
                     handleFocus={handleFocus}
                     handleBackspace={handleBackspace}
                     boardRef={boardRef}
+                    win={win}
                 />
                 <ByText 
                     title={crosswordData.title}
@@ -448,6 +473,7 @@ export default function App() {
                     handleClick={handleClueClick}
                 />
             </div>
+            {win && <WinModal time={timer.time} />}
         </>
     )
 }

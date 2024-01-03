@@ -39,6 +39,7 @@ export default function Crossword(props) {
                                     handleBackspace={props.handleBackspace}
                                     boardRef={props.boardRef}
                                     textColour={props.gameState.boardStyling[rowIndex][colIndex]}
+                                    win={props.win}
                                 />
                             )
                         })}
