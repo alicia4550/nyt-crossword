@@ -3,6 +3,44 @@ import FontAwesome from 'react-fontawesome'
 
 import Dropdown from "./Dropdown"
 
+/**
+ * Module to render actions header
+ * @module actionsHeader
+*/
+
+/**
+ * Functional React component for actions header
+ * @member actionsHeader
+ * @function ActionsHeader
+ * @param {module:app~Timer} timer object containing start time and elapsed time since start
+ * @param {function} clearBoard function to clear all values of crossword board
+ * @param {function} revealLetter function to reveal letter in active square of crossword
+ * @param {function} revealWord function to reveal each letter of word containing active square of crossword
+ * @param {function} revealGrid function to reveal all squares of crossword board
+ * @param {function} checkLetter function to check letter in active square of crossword
+ * @param {function} checkWord function to check each letter of word containing active square of crossword
+ * @param {function} checkGrid function to check all squares of crossword board
+ * @example 
+ * const [timer, setTimer] = React.useState({
+    start: null,
+    time: {
+        hours: 0,
+        mins: 0,
+        secs: 0
+    }
+})
+...
+<ActionsHeader
+    timer={timer}
+    clearBoard={clearBoard}
+    revealLetter={revealLetter}
+    revealWord={revealWord}
+    revealGrid={revealGrid}
+    checkLetter={checkLetter}
+    checkWord={checkWord}
+    checkGrid={checkGrid} />
+ * @returns {React.ReactElement} Actions Header React component to be rendered in the DOM
+ */
 export default function ActionsHeader(props) {
     function test(func) {
         console.log(`Clicked ${func}`)

@@ -11,21 +11,62 @@ import ByText from "./components/ByText"
 import ActionsHeader from "./components/ActionsHeader"
 import WinModal from "./components/WinModal"
 
+/**
+ * Module to render all DOM elements and maintain state variables
+ * @module app
+ * @exports GameState
+ * @exports Timer
+*/
+
+/**
+ * Functional React component for app
+ * @member app
+ * @function App
+ * @example
+ * <App />
+ * @returns {React.ReactElement} App React component to be rendered in the DOM
+ */
 export default function App() {
+    /** @type {Array.<Array.<module:crosswordData~Square>>} */
     const board = crosswordData.board
 
+    /** @type {Array.<Array.<string>>} */
     const playerBoard = board.map(row => {
         return row.map(square => {
             return square.value === "#" ? "#" : ""
         })
     })
 
+    /** @type {Array.<Array.<string>>} */
     const boardStyling = board.map(row => {
         return row.map(square => {
             return "black"
         })
     })
 
+    /** 
+     * @typedef GameState
+     * @property {{row: number, col: number}} activeSquare object containing the row and column numbers of the currently selected square
+     * @property {number} activeSquare.row row number of active square
+     * @property {number} activeSquare.col column number of active square
+     * @property {number} activeClue number of the active clue containing the current active square (with respect to its index in either the horizontal clues or vertical clues arrays)
+     * @property {boolean} isHorizontal boolean representing if the user is currently looking at the horizontal or vertical clues
+     * @property {Array.<Array.<string>>} playerBoard 2D array of all user-inputted values of the crossword board
+     * @property {Array.<Array.<string>>} boardStyling 2D array of the text colors of all squares in the crossword board (representing whether each square is incorrect, revealed, or neither)
+     */
+    /**
+     * @callback GameStateSetter
+     * @param {GameState} gameState current game state
+     * @returns {void}
+     */
+    /**
+     * Set game state
+     * @member app
+     * @function React.useState
+     * @param {GameState} gameState current game state
+     * @returns {GameState} current game state
+     * @returns {GameStateSetter} function to set new game state
+     */
     const [gameState, setGameState] = React.useState({
         activeSquare: {
             row: 0,
@@ -37,6 +78,27 @@ export default function App() {
         boardStyling: boardStyling
     })
 
+    /** 
+     * @typedef Timer
+     * @property {number} start starting time (time of user's first input, null if user has not inputted any values)
+     * @property {{hours: number, mins: number, secs: number}} time elapsed time since the starting time
+     * @property {number} time.hours hour component of elapsed time
+     * @property {number} time.mins minute component of elapsed time
+     * @property {number} time.secs minute component of elapsed time
+     */
+    /**
+     * @callback TimerSetter
+     * @param {Timer} timer current state of starting and elapsed time
+     * @returns {void}
+     */
+    /**
+     * Set timer state
+     * @member app
+     * @function React.useState
+     * @param {Timer} gameState object of starting time and current elapsed time
+     * @returns {Timer} object of starting time and current elapsed time
+     * @returns {TimerSetter} function to set new timer
+     */
     const [timer, setTimer] = React.useState({
         start: null,
         time: {
@@ -46,12 +108,36 @@ export default function App() {
         }
     })
 
-    const[win, setWin] = React.useState(false)
+    /**
+     * @callback WinSetter
+     * @param {boolean} win whether the player has won the game
+     * @returns {void}
+     */
+    /**
+     * Set win state
+     * @member app
+     * @function React.useState
+     * @param {boolean} win true if user has won, false if user has not won (incomplete board or board with incorrect values)
+     * @returns {boolean} whether the player has won the game
+     * @returns {TimerSetter} function to set new win state
+     */
+    const [win, setWin] = React.useState(false)
 
+    /** @type {Array.<React.MutableRefObject>} */
     const hClueRef = React.useRef([])
+    /** @type {Array.<React.MutableRefObject>} */
     const vClueRef = React.useRef([])
+    /** @type {Array.<React.MutableRefObject>} */
     const boardRef = React.useRef([])
 
+    /**
+     * Handle click events on crossword board
+     * @member app
+     * @function handleClick
+     * @param {number} row row number (zero-indexed) of selected square on crossword board
+     * @param {number} col column number (zero-indexed) of selected square on crossword board
+     * @returns {void}
+     */
     function handleClick(row, col) {
         setGameState(prevGameState => {
             let toggleIsHorizontal = row === prevGameState.activeSquare.row && col === prevGameState.activeSquare.col
@@ -66,6 +152,14 @@ export default function App() {
         })
     }
 
+    /**
+     * Handle focus events on input elements on crossword board
+     * @member app
+     * @function handleFocus
+     * @param {number} row row number (zero-indexed) of selected square on crossword board
+     * @param {number} col column number (zero-indexed) of selected square on crossword board
+     * @returns {void}
+     */
     function handleFocus(row, col) {
         setGameState(prevGameState => {
             return {
@@ -75,6 +169,13 @@ export default function App() {
         })
     }
 
+    /**
+     * Handle input events on input elements on crossword board
+     * @member app
+     * @function handleInput
+     * @param {event} event input event
+     * @returns {void}
+     */
     function handleInput(event) {
         if (timer.start === null) {
             setTimer(prevTimer => {
@@ -101,6 +202,14 @@ export default function App() {
         })
     }
 
+    /**
+     * Handle click events on clues in the clues sidebar in order to select the corresponding active square on the crossword board
+     * @member app
+     * @function handleClueClick
+     * @param {number} index index value of clue in respect to either the array of horizontal clues or the array of vertical clues
+     * @param {boolean} isHorizontal boolean describing whether the active clue is a horizontal or vertical clue
+     * @returns {void}
+     */
     function handleClueClick(index, isHorizontal) {
         if (isHorizontal) {
             setGameState(prevGameState => {
@@ -121,6 +230,15 @@ export default function App() {
         }
     }
 
+    /**
+     * Handle backspace inputs in the input elements on crossword board
+     * @member app
+     * @function handleBackspace
+     * @param {event} event input event
+     * @param {number} row row number (zero-indexed) of selected square on crossword board
+     * @param {number} col column number (zero-indexed) of selected square on crossword board 
+     * @returns {void}
+     */
     function handleBackspace(event, row, col) {
         if (event.keyCode === 8) {
             setGameState(prevGameState => {
@@ -160,6 +278,19 @@ export default function App() {
         }
     }
 
+    /**
+     * Scroll clue component into view upon clicking one of its associated squares on the crossword board
+     * @callback ScrollIntoView
+     * @returns {void}
+     */
+    /**
+     * Scroll a clue element into view in the clues sidebar when the active clue is changed
+     * @member app
+     * @function React.useEffect
+     * @param {ScrollIntoView} func callback function that scrolls clue component into view
+     * @param {Array.<number>} activeClue dependency array containing index value of clue in respect to either the array of horizontal clues or the array of vertical clues
+     * @returns {void}
+     */
     React.useEffect(() => {
         if (gameState.isHorizontal) {
             hClueRef.current[gameState.activeClue].scrollIntoView()
@@ -168,6 +299,19 @@ export default function App() {
         }
     }, [gameState.activeClue])
 
+    /**
+     * Set active clue according to active square
+     * @callback SetActiveClue
+     * @returns {void}
+     */
+    /** 
+     * Set the active clue upon change of the active square
+     * @member app
+     * @function React.useEffect
+     * @param {SetActiveClue} func callback function that sets the active clue according to the active square
+     * @param {Array.<{row: number, col: number}>} activeSquare dependency array containing an object with the row and column numbers of the active square
+     * @returns {void}
+    */
     React.useEffect(() => {
         boardRef.current[gameState.activeSquare.row][gameState.activeSquare.col].focus()
         setGameState(prevGameState => {
@@ -179,13 +323,20 @@ export default function App() {
         })
     }, [gameState.activeSquare])
 
-    function getNextHorizontalSquare(prevGameState) {
-        let currentRow = prevGameState.activeSquare.row
-        let currentCol = prevGameState.activeSquare.col
+    /**
+     * Get next empty square (in the horizontal direction) after input
+     * @member app
+     * @function getNextHorizontalSquare
+     * @param {GameState} gameState current game state
+     * @returns {{row: number, col: number}} object containing the row and column number of the next horizontal square
+     */
+    function getNextHorizontalSquare(gameState) {
+        let currentRow = gameState.activeSquare.row
+        let currentCol = gameState.activeSquare.col
 
-        while (prevGameState.playerBoard[currentRow][currentCol] != "") {
+        while (gameState.playerBoard[currentRow][currentCol] != "") {
             if (currentCol + 1 === prevGameState.playerBoard[0].length) {
-                currentRow = currentRow + 1 === prevGameState.playerBoard.length ? 0 : currentRow + 1
+                currentRow = currentRow + 1 === gameState.playerBoard.length ? 0 : currentRow + 1
                 currentCol = 0
                 continue
             } else {
@@ -200,6 +351,13 @@ export default function App() {
         }
     }
 
+    /**
+     * Get next empty square (in the vertical direction) after input
+     * @member app
+     * @function getNextVerticalSquare
+     * @param {GameState} gameState current game state
+     * @returns {{row: number, col: number}} object containing the row and columnn number of the next vertical square
+     */
     function getNextVerticalSquare(gameState){
         let currentRow = gameState.activeSquare.row
         let currentCol = gameState.activeSquare.col
@@ -224,6 +382,12 @@ export default function App() {
         }
     }
 
+    /**
+     * Clear all inputs from crossword board
+     * @member app
+     * @function clearBoard
+     * @returns {void}
+     */
     function clearBoard() {
         setGameState(prevGameState => {
             return {
@@ -234,6 +398,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Reveal letter in active square of crossword
+     * @member app
+     * @function revealLetter
+     * @returns {void}
+     */
     function revealLetter() {
         const row = gameState.activeSquare.row
         const col = gameState.activeSquare.col
@@ -250,6 +420,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Reveal each letter of word containing active square of crossword
+     * @member app
+     * @function revealWord
+     * @returns {void}
+     */
     function revealWord() {
         setGameState(prevGameState => {
             let newPlayerBoard = [...prevGameState.playerBoard]
@@ -292,6 +468,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Reveal all squares of crossword board
+     * @member app
+     * @function revealGrid
+     * @returns {void}
+     */
     function revealGrid() {
         setGameState(prevGameState => {
             let newPlayerBoard = board.map(row => {
@@ -312,6 +494,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Check letter in active square of crossword
+     * @member app
+     * @function checkLetter
+     * @returns {void}
+     */
     function checkLetter() {
         const row = gameState.activeSquare.row
         const col = gameState.activeSquare.col
@@ -325,6 +513,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Check each letter of word containing active square of crossword
+     * @member app
+     * @function checkWord
+     * @returns {void}
+     */
     function checkWord() {
         setGameState(prevGameState => {
             let newBoardStyling = [...prevGameState.boardStyling]
@@ -368,7 +562,12 @@ export default function App() {
             }
         })
     }
-
+    /**
+     * Check all squares of crossword board
+     * @member app
+     * @function checkGrid
+     * @returns {void}
+     */
     function checkGrid() {
         setGameState(prevGameState => {
             let newBoardStyling = prevGameState.playerBoard.map((row, rowIndex) => {
@@ -383,6 +582,12 @@ export default function App() {
         })
     }
 
+    /**
+     * Get time spent on crossword (measured from the time of first input)
+     * @member app
+     * @function getTime
+     * @returns {void}
+     */
     function getTime() {
         const time = Date.now() - timer.start;
     
@@ -402,12 +607,38 @@ export default function App() {
         })
       };
 
+    /**
+     * Set timer that counts every second
+     * @callback setTimerFunction
+     * @returns {function} callback function that cancels the timer
+     */
+    /**
+     * Start the timer upon user's first input
+     * @member app
+     * @function React.useEffect
+     * @param {setTimerFunction} func callback function that creates a timer to count every second
+     * @param {number} start number representing the start time (measured at user's first input)
+     * @returns {void}
+     */
     React.useEffect(() => {
         const interval = setInterval(() => getTime(), 1000);
     
         return () => clearInterval(interval);
     }, [timer.start]);
 
+    /**
+     * Determine if a player has won (all filled in squares are correct)
+     * @callback isWin
+     * @returns {void}
+     */
+    /**
+     * Check if a player has won upon any change in values on the crossword board
+     * @member app
+     * @function React.useEffect
+     * @param {isWin} func callback function that determines if the player has won
+     * @param {Array.<Array.<string>>} playerBoard 2D array of all user-inputted values of the crossword board
+     * @returns {void}
+     */
     React.useEffect(() => {
         let win = true
         for (let i = 0; i < board.length; i++) {

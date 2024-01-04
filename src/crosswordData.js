@@ -1,3 +1,27 @@
+/**
+ * Module to fetch and format crossword data
+ * @module crosswordData
+ * @exports Clue
+ * @exports Square
+ */
+/** 
+ * @typedef Square
+ * @property {string} value letter corresponding to crossword square
+ * @property {boolean} isInput boolean representing whether a square is an input square or a black square
+ * @property {boolean} isStart boolean representing whether a square is the beginning of a word
+ * @property {number} clueNum clue number as displayed on the crossword board (number value if the square is the first square of the word, else null)
+ * @property {number} hClueNum clue number corresponding to the horizontal clue of the square (with respect to its index in the array of horizontal clues)
+ * @property {number} vClueNum clue number corresponding to the vertical clue of the square (with respect to its index in the array of vertical clues)
+ */
+/** 
+ * @typedef Clue
+ * @property {number} clueNum clue number as displayed on the crossword board
+ * @property {string} clueText clue text
+ * @property {{row: number, col: number}} firstSquare object containing the row and column numbers of the first square of the clue
+ * @property {number} firstSquare.row row number of first square
+ * @property {number} firstSquare.col column number of first square
+ */
+
 const date = new Date()
 const dateString = date.getFullYear().toString().slice(2) + (date.getMonth()+1).toString().padStart(2, "0") + date.getDate().toString().padStart(2, "0")
 
@@ -23,7 +47,7 @@ let hCluesText = []
 let vCluesText = []
 
 for (let i = 0; i < rows; i++) {
-    board.push(splitString[16+i].split(''))
+    board.push(splitString[16+i].replace(/%/g, "").split(''))
 }
 
 for (let i = 0; i < numHClues; i++) {
@@ -53,7 +77,9 @@ board.map((row, rowIndex) => {
             hClueCount++
             vClueCount++
 
-            hClues.push({
+            hClues.push(
+                /** @type {Clue} */
+                {
                 clueNum: clueNum,
                 clueText: hCluesText[hClueCount],
                 firstSquare: {
@@ -111,6 +137,16 @@ board.map((row, rowIndex) => {
     boardData.push(rowData)
 })
 
+/**
+ * Data of daily crossword
+ * @member crosswordData
+ * @property {string} id numerical id of crossword puzzle
+ * @property {string} title title of crossword
+ * @property {string} author author and editor of crossword
+ * @property {Array.<Array.<Square>>} boardData data of all squares in crossword
+ * @property {Array.<Clue>} hClues all horizontal clues of crossword
+ * @property {Array.<Clue>} vClues all vertical clues of crossword
+ */
 export default {
     id: id,
     title: title,

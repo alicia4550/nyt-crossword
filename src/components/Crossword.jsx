@@ -2,6 +2,51 @@ import React from "react"
 
 import Square from "./Square"
 
+/**
+ * Module to render crossword board
+ * @module crossword
+*/
+
+/**
+ * Functional React component for crossword
+ * @member crossword
+ * @function Crossword
+ * @param {Array.<Array.<module:crosswordData~Square>>} board 2D array of properties of all squares of filled crossword
+ * @param {module:app~GameState} gameState current game state
+ * @param {function} handleClick function that handles click on individual square of crossword
+ * @param {function} handleInput function that handles input in individual square of crossword
+ * @param {function} handleFocus function that handles focus on input element of individual square of crossword
+ * @param {function} handleBackspace function that handles backspace inputs in individual square of crossword
+ * @param {React.MutableRefObject} boardRef reference to DOM elements of crossword squares
+ * @param {boolean} win true if user has won, false if crossboard is incomplete or contains errors
+ * @example
+ * const board = [[...], ...]
+const [gameState, setGameState] = React.useState({
+    activeSquare: {
+        row: 0,
+        col: 0
+    },
+    activeClue: 0,
+    isHorizontal: true,
+    playerBoard: [[...], ...],
+    boardStyling: [[...], ...]
+})
+const clueRef = React.useRef([])
+const clues = [...]
+...
+<Crossword 
+    board={board}
+    gameState={gameState}
+    handleClick={handleClick}
+    handleInput={handleInput}
+    handleFocus={handleFocus}
+    handleBackspace={handleBackspace}
+    boardRef={boardRef}
+    win={win}
+/>
+ * @returns {React.ReactElement} Crossword React component to be rendered in the DOM
+ */
+
 export default function Crossword(props) {
     const style = {
         display: "grid",

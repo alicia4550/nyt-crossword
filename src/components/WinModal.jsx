@@ -1,6 +1,28 @@
 import React from "react"
 import FontAwesome from "react-fontawesome"
 
+/**
+ * Module to render win modal
+ * @module winModal
+*/
+
+/**
+ * Functional React component for win modal
+ * @member winModal
+ * @function WinModal
+ * @param {{hours: number, mins: number, secs: number}} time elapsed time since the starting time
+ * @param {number} time.hours hour component of elapsed time
+ * @param {number} time.mins minute component of elapsed time
+ * @param {number} time.secs minute component of elapsed time
+ * @example
+ * <WinModal 
+    time={
+        hours: 1,
+        mins: 23,
+        sec: 45
+    } />
+ * @returns {React.ReactElement} Win Modal React component to be rendered in the DOM
+ */
 export default function WinModal(props) {
     const [hidden, setHidden] = React.useState(false)
 
