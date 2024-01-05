@@ -5,7 +5,7 @@ import './App.css'
 import ClueHeader from "./components/ClueHeader"
 import Crossword from "./components/Crossword"
 
-import crosswordData from "./crosswordData"
+// import crosswordData, { getDataString } from "./crosswordData"
 import ClueSidebar from "./components/ClueSidebar"
 import ByText from "./components/ByText"
 import ActionsHeader from "./components/ActionsHeader"
@@ -22,11 +22,14 @@ import WinModal from "./components/WinModal"
  * Functional React component for app
  * @member app
  * @function App
+ * @param {module:crosswordData~CrosswordData} crosswordData object containing all properties of crossword
  * @example
- * <App />
+ * <App crosswordData={crosswordData} />
  * @returns {React.ReactElement} App React component to be rendered in the DOM
  */
-export default function App() {
+export default function App(props) {
+    const crosswordData = props.crosswordData
+
     /** @type {Array.<Array.<module:crosswordData~Square>>} */
     const board = crosswordData.board
 
@@ -663,6 +666,7 @@ export default function App() {
     return (
         <>
             <ActionsHeader
+                crosswordData={crosswordData}
                 timer={timer}
                 clearBoard={clearBoard}
                 revealLetter={revealLetter}

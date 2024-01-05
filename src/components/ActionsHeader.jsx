@@ -3,7 +3,7 @@ import FontAwesome from 'react-fontawesome'
 
 import Dropdown from "./Dropdown"
 
-import print from "../print"
+import printCrossword from "../print"
 
 /**
  * Module to render actions header
@@ -14,6 +14,7 @@ import print from "../print"
  * Functional React component for actions header
  * @member actionsHeader
  * @function ActionsHeader
+ * @param {module:crosswordData~CrosswordData} crosswordData object containing all properties of crossword
  * @param {module:app~Timer} timer object containing start time and elapsed time since start
  * @param {function} clearBoard function to clear all values of crossword board
  * @param {function} revealLetter function to reveal letter in active square of crossword
@@ -92,7 +93,7 @@ export default function ActionsHeader(props) {
                         func3={props.checkGrid}
                     />
                 </div>
-                <button className="nav-item" onClick={print}>
+                <button className="nav-item" onClick={() => printCrossword(props.crosswordData)}>
                     Print
                 </button>
                 <button className="nav-item">

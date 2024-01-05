@@ -6,7 +6,7 @@
 
 This project is a web-based clone of the New York Times crossword. The application fetches the daily crossword through an API call to the New York Times Syndicate.
 
-Basic features of the NYT crossword are present, such as checking and revealing answers. In progress features include saving game progress, multiplayer option, error-check mode, and generating a PDF of the puzzle.
+Basic features of the NYT crossword are present, such as checking and revealing answers. In progress features include saving game progress, multiplayer option, and error-check mode.
 
 ## Built With
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
@@ -58,7 +58,14 @@ This project is documented using JSDoc. To get the documentation, follow one of 
 ./node_modules/.bin/jsdoc src -r -d docs -R "README.md"
 ```
 
-2. Navigate to the ``docs`` directory and open the ``index.html`` file.
+2. In the ``node_modules\jsdoc\conf.json.EXAMPLE`` file, add the following section to the ``defaults`` property of the ``templates`` section: 
+```
+"staticFiles": {
+    "include": ["./demo.png"]
+}
+```
+
+3. Navigate to the ``docs`` directory and open the ``index.html`` file.
 
 ### Option 2: Configuring JSDoc with a configuration file
 
