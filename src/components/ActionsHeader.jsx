@@ -3,6 +3,8 @@ import FontAwesome from 'react-fontawesome'
 
 import Dropdown from "./Dropdown"
 
+import print from "../print"
+
 /**
  * Module to render actions header
  * @module actionsHeader
@@ -90,7 +92,7 @@ export default function ActionsHeader(props) {
                         func3={props.checkGrid}
                     />
                 </div>
-                <button className="nav-item">
+                <button className="nav-item" onClick={print}>
                     Print
                 </button>
                 <button className="nav-item">

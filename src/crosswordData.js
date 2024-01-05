@@ -78,7 +78,7 @@ board.map((row, rowIndex) => {
             vClueCount++
 
             hClues.push(
-                /** @type {Clue} */
+                /** @type {module:crosswordData~Clue} */
                 {
                 clueNum: clueNum,
                 clueText: hCluesText[hClueCount],

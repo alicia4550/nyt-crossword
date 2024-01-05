@@ -56,16 +56,16 @@ export default function App() {
      */
     /**
      * @callback GameStateSetter
-     * @param {GameState} gameState current game state
+     * @param {module:app~GameState} gameState current game state
      * @returns {void}
      */
     /**
      * Set game state
      * @member app
      * @function React.useState
-     * @param {GameState} gameState current game state
-     * @returns {GameState} current game state
-     * @returns {GameStateSetter} function to set new game state
+     * @param {module:app~GameState} gameState current game state
+     * @returns {module:app~GameState} current game state
+     * @returns {module:app~GameStateSetter} function to set new game state
      */
     const [gameState, setGameState] = React.useState({
         activeSquare: {
@@ -88,16 +88,16 @@ export default function App() {
      */
     /**
      * @callback TimerSetter
-     * @param {Timer} timer current state of starting and elapsed time
+     * @param {module:app~Timer} timer current state of starting and elapsed time
      * @returns {void}
      */
     /**
      * Set timer state
      * @member app
      * @function React.useState
-     * @param {Timer} gameState object of starting time and current elapsed time
-     * @returns {Timer} object of starting time and current elapsed time
-     * @returns {TimerSetter} function to set new timer
+     * @param {module:app~Timer} gameState object of starting time and current elapsed time
+     * @returns {module:app~Timer} object of starting time and current elapsed time
+     * @returns {module:app~TimerSetter} function to set new timer
      */
     const [timer, setTimer] = React.useState({
         start: null,
@@ -119,7 +119,7 @@ export default function App() {
      * @function React.useState
      * @param {boolean} win true if user has won, false if user has not won (incomplete board or board with incorrect values)
      * @returns {boolean} whether the player has won the game
-     * @returns {TimerSetter} function to set new win state
+     * @returns {module:app~WinSetter} function to set new win state
      */
     const [win, setWin] = React.useState(false)
 
@@ -327,7 +327,7 @@ export default function App() {
      * Get next empty square (in the horizontal direction) after input
      * @member app
      * @function getNextHorizontalSquare
-     * @param {GameState} gameState current game state
+     * @param {module:app~GameState} gameState current game state
      * @returns {{row: number, col: number}} object containing the row and column number of the next horizontal square
      */
     function getNextHorizontalSquare(gameState) {
@@ -335,7 +335,7 @@ export default function App() {
         let currentCol = gameState.activeSquare.col
 
         while (gameState.playerBoard[currentRow][currentCol] != "") {
-            if (currentCol + 1 === prevGameState.playerBoard[0].length) {
+            if (currentCol + 1 === gameState.playerBoard[0].length) {
                 currentRow = currentRow + 1 === gameState.playerBoard.length ? 0 : currentRow + 1
                 currentCol = 0
                 continue
@@ -355,7 +355,7 @@ export default function App() {
      * Get next empty square (in the vertical direction) after input
      * @member app
      * @function getNextVerticalSquare
-     * @param {GameState} gameState current game state
+     * @param {module:app~GameState} gameState current game state
      * @returns {{row: number, col: number}} object containing the row and columnn number of the next vertical square
      */
     function getNextVerticalSquare(gameState){
