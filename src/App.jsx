@@ -508,7 +508,7 @@ export default function App(props) {
         const col = gameState.activeSquare.col
         setGameState(prevGameState => {
             let newBoardStyling = [...prevGameState.boardStyling]
-            newBoardStyling[row][col] = prevGameState.playerBoard[row][col] != board[row][col].value ? "red" : prevGameState.boardStyling[row][col]
+            newBoardStyling[row][col] = prevGameState.playerBoard[row][col] != board[row][col].value && prevGameState.playerBoard[row][col] != "" ? "red" : prevGameState.boardStyling[row][col]
             return {
                 ...prevGameState,
                 boardStyling: newBoardStyling
@@ -531,28 +531,28 @@ export default function App(props) {
 
             if (prevGameState.isHorizontal) {
                 while (col >= 0 && gameState.playerBoard[row][col] != "#") {
-                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                    if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
                         newBoardStyling[row][col] = "red"
                     }
                     col--
                 } 
                 col = gameState.activeSquare.col
                 while (col < board[0].length && gameState.playerBoard[row][col] != "#") {
-                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                    if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
                         newBoardStyling[row][col] = "red"
                     }
                     col++
                 } 
             } else {
                 while (row >= 0 && gameState.playerBoard[row][col] != "#") {
-                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                    if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
                         newBoardStyling[row][col] = "red"
                     }
                     row--
                 } 
                 row = gameState.activeSquare.row
-                while (row < board[0].length && gameState.playerBoard[row][col] != "#") {
-                    if (gameState.playerBoard[row][col] != board[row][col] && gameState.playerBoard[row][col] != "") {
+                while (row < board.length && gameState.playerBoard[row][col] != "#") {
+                    if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
                         newBoardStyling[row][col] = "red"
                     }
                     row++
@@ -608,7 +608,7 @@ export default function App(props) {
                 }
             }
         })
-      };
+    };
 
     /**
      * Set timer that counts every second

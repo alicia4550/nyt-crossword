@@ -3,7 +3,7 @@ import FontAwesome from 'react-fontawesome'
 
 import Dropdown from "./Dropdown"
 
-import printCrossword from "../print"
+import { printCrossword } from "../print"
 
 /**
  * Module to render actions header
@@ -45,9 +45,6 @@ import printCrossword from "../print"
  * @returns {React.ReactElement} Actions Header React component to be rendered in the DOM
  */
 export default function ActionsHeader(props) {
-    function test(func) {
-        console.log(`Clicked ${func}`)
-    }
     return (
         <nav>
             <div style={{float: "left"}}>
@@ -60,7 +57,7 @@ export default function ActionsHeader(props) {
                             />
                         }
                         menuOptions={["Save", "Clear"]}
-                        func1={() => test("Save")}
+                        func1={() => console.log("Save")}
                         func2={props.clearBoard}
                     />
                 </div>

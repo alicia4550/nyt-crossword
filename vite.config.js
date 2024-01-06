@@ -13,5 +13,16 @@ export default defineConfig({
           },
         },
       },
-  plugins: [react()],
+    plugins: [react()], 
+    test: {
+        coverage: {
+            reportsDirectory: './tests/coverage',
+            include: [
+                'src'
+            ]
+        },
+        globals: true,
+        setupFiles: './tests/setup.js',
+        environment: "jsdom"
+    }
 })

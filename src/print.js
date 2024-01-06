@@ -4,7 +4,6 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 /**
  * Module to fetch and format crossword data
  * @module print
- * @exports printCrossword
  */
 
 /**
@@ -16,7 +15,6 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
  */
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
-// const {id, title, author, board, hClues, vClues} = crosswordData
 
 /**
  * Create crossword grid
@@ -25,7 +23,7 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
  * @param {Array.<Array.<Square>>} board 2D array of objects containing data properties of each square of the board
  * @returns {module:print~Table} JSON object of properties of crossword grid to be rendered by pdfmake
  */
-function createCrossword(board) {
+export function createCrossword(board) {
     const numRows = board[0].length
     return {
         headerRows: 0,
@@ -43,7 +41,7 @@ function createCrossword(board) {
  * @param {Array.<Array.<Square>>} board 2D array of objects containing data properties of each square of the board
  * @returns {Array.<Array.<number|string|Object.<string, string>>>} 2D array of JSON objects representing each square of grid
  */
-function createGrid(board) {
+export function createGrid(board) {
     return board.map(row => {
         return row.map(square => {
             if (square.value === "#") {
@@ -69,7 +67,7 @@ function createGrid(board) {
  * @param {Array.<Array.<module:crosswordData~Clue>>} clueList list of clues to display
  * @returns {module:print~Table} JSON object of properties of table to be rendered by pdfmake
  */
-function createCluesTable(heading, clueList) {
+export function createCluesTable(heading, clueList) {
     return {
         headerRows: 1,
         widths: [20, 210],
@@ -86,7 +84,7 @@ function createCluesTable(heading, clueList) {
  * @param {Array.<Array.<module:crosswordData~Clue>>} clueList list of clues to display
  * @returns {Array.<Array.<Object.<string, string>>>} 2D array of JSON objects representing each clue
  */
-function createClueTableBody(headingText, clueList) {
+export function createClueTableBody(headingText, clueList) {
     const heading = [
         {
             text: headingText,
@@ -120,7 +118,7 @@ function createClueTableBody(headingText, clueList) {
  * @param {module:crosswordData~CrosswordData} crosswordData object containing all properties of crossword
  * @returns {module:print~DocDefinition} document definition used to generate PDF
  */
-function getDocDefinition(crosswordData) {
+export function getDocDefinition(crosswordData) {
     return {
         content: [{
             text: "NYT Crossword Clone",
@@ -164,17 +162,18 @@ function getDocDefinition(crosswordData) {
             ],
             columnGap: 25,
             margin: [0, 25, 0, 0]
-        }, ]
+        }]
     };
 }
 
 /**
- * pdfMake method call to download PDF of crossword puzzle, saves as "NY Times - <CROSSWORD_ID>"
+ * pdfMake method call to print a PDF of the crossword puzzle"
  * @member print
  * @function printCrossword
  * @param {module:crosswordData~CrosswordData} crosswordData object containing all properties of crossword
  */
-export default function printCrossword(crosswordData) {
+export function printCrossword(crosswordData) {
     const docDefinition = getDocDefinition(crosswordData)
-    pdfMake.createPdf(docDefinition).download("NY Times - " + crosswordData.id);
+    // pdfMake.createPdf(docDefinition).download("NY Times - " + crosswordData.id);
+    pdfMake.createPdf(docDefinition).print();
 }
