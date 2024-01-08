@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { getUrl, getDataString, getCrosswordData } from "../src/crosswordData"
+import { getUrl, getDataString, getCrosswordData } from "../crosswordData"
 
 test("get URL for today's daily crossword", () => {
     const date = new Date()

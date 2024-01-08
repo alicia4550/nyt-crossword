@@ -11,6 +11,9 @@ Basic features of the NYT crossword are present, such as checking and revealing 
 ## Built With
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![NodeJS](https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![ExpressJS](https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
@@ -49,27 +52,11 @@ npm run dev
 
 ## Documentation
 
-This project is documented using JSDoc. To get the documentation, follow one of the two following options:
+This project is documented using JSDoc. To get the documentation, go through the following steps:
 
-### Option 1: Command-line arguments to JSDoc
+1. Open the ``node_modules\jsdoc\conf.json.EXAMPLE`` file.
 
-1. Run the following command:
-```
-./node_modules/.bin/jsdoc src -r -d docs -R "README.md"
-```
-
-2. In the ``node_modules\jsdoc\conf.json.EXAMPLE`` file, add the following section to the ``defaults`` property of the ``templates`` section: 
-```
-"staticFiles": {
-    "include": ["./demo.png"]
-}
-```
-
-3. Navigate to the ``docs`` directory and open the ``index.html`` file.
-
-### Option 2: Configuring JSDoc with a configuration file
-
-1. In the ``node_modules\jsdoc\conf.json.EXAMPLE`` file, add the following section:
+2. Add the following ``opts`` property:
 ```
 "opts": {
     "recurse": true,
@@ -77,19 +64,28 @@ This project is documented using JSDoc. To get the documentation, follow one of 
     "destination": "./docs/"
 }
 ```
-2. In the ``node_modules\jsdoc\conf.json.EXAMPLE`` file, add the following section to the ``defaults`` property of the ``templates`` section: 
+3. Add the following section to the ``defaults`` property of the ``templates`` section: 
 ```
 "staticFiles": {
     "include": ["./demo.png"]
 }
 ```
 
-3. Run the following command:
+4. Add the following section to the ``source`` property:
 ```
-./node_modules/.bin/jsdoc src
+"exclude": [
+    "node_modules",
+    "api/node_modules",
+    "client/node_modules"
+]
 ```
 
-4. Navigate to the ``docs`` directory and open the ``index.html`` file.
+5. Run the following command:
+```
+./node_modules/.bin/jsdoc .
+```
+
+6. Navigate to the ``docs`` directory and open the ``index.html`` file.
 
 
 ## License

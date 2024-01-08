@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-import { getUrl, getDataString, getCrosswordData } from './crosswordData.js'
+import { getUrl, getDataString, getCrosswordData } from '../..api/crosswordData'
 
 const url = getUrl()
 const dataString = await getDataString(url)

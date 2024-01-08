@@ -3,7 +3,7 @@ import FontAwesome from 'react-fontawesome'
 
 import Dropdown from "./Dropdown"
 
-import { printCrossword } from "../print"
+import { printCrossword } from "../../../api/print"
 
 /**
  * Module to render actions header

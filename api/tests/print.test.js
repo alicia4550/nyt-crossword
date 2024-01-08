@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { createCrossword, createGrid, createCluesTable, createClueTableBody, getDocDefinition, printCrossword } from '../src/print'
+import { createCrossword, createGrid, createCluesTable, createClueTableBody, getDocDefinition, printCrossword } from '../print'
 
 const board = [[
     {value: "A", isInput: true, isStart: true, clueNum: 1, hClueNum: 0, vClueNum: 0},

@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import App from "../src/App"
-import { getCrosswordData } from '../src/crosswordData'
+import { getCrosswordData } from '../../api/crosswordData'
 
 const dataString = 
 `ARCHIVE
