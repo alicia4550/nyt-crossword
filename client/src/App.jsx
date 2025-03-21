@@ -1,4 +1,7 @@
 import React, { useEffect } from "react"
+import io from 'socket.io-client';
+
+// import "https://cdn.socket.io/4.8.1/socket.io.min.js"
 
 import './App.css'
 
@@ -9,6 +12,10 @@ import ClueSidebar from "./components/ClueSidebar"
 import ByText from "./components/ByText"
 import ActionsHeader from "./components/ActionsHeader"
 import WinModal from "./components/WinModal"
+
+// const socket = io("http://localhost:3000");
+const socket = io("http://localhost:3000");
+socket.connect();
 
 /**
  * Module to render all DOM elements and maintain state variables
