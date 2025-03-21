@@ -14,7 +14,7 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
  * @property {Array.<Array.<Object.<string, string>>>} body JSON object containing all properties of all cells of the table
  */
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+pdfMake.vfs = pdfFonts;
 
 /**
  * Create crossword grid
