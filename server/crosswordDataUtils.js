@@ -1,6 +1,6 @@
 /**
  * Module to fetch and format crossword data
- * @module crosswordData
+ * @module crosswordDataUtils
  * @exports Clue
  * @exports Square
  * @exports CrosswordData
@@ -38,11 +38,11 @@
  * @function getUrl
  * @returns {string} url string to fetch crossword
  */
-export function getUrl() {
-    const date = new Date()
-    const dateString = date.getFullYear().toString().slice(2) + (date.getMonth()+1).toString().padStart(2, "0") + date.getDate().toString().padStart(2, "0")
+function getUrl() {
+    const date = new Date();
+    const dateString = date.getFullYear().toString().slice(2) + (date.getMonth()+1).toString().padStart(2, "0") + date.getDate().toString().padStart(2, "0");
 
-    return `/nytsyn-crossword-mh/nytsyncrossword?date=${dateString}`
+    return `https://nytsyn.pzzl.com/nytsyn-crossword-mh/nytsyncrossword?date=${dateString}`;
 }
 
 /**
@@ -52,11 +52,11 @@ export function getUrl() {
  * @param {string} url 
  * @returns {string} crossword data in a multiline string
  */
-export async function getDataString(url) {
-    const response = await fetch(url)
-    const dataString = await response.text()
+async function getDataString(url) {
+    const response = await fetch(url);
+    const dataString = await response.text();
 
-    return dataString
+    return dataString;
 }
 
 /**
@@ -64,53 +64,53 @@ export async function getDataString(url) {
  * @param {string} dataString multiline string containing all crossword data
  * @returns {module:crosswordData~CrosswordData} crossword data formatted into object with properties
  */
-export function getCrosswordData(dataString) {
-    const splitString = dataString.split("\n")
+function getCrosswordData(dataString) {
+    const splitString = dataString.split("\n");
 
-    const id = splitString[2]
-    const title = splitString[4]
-    const author = splitString[6]
+    const id = splitString[2];
+    const title = splitString[4];
+    const author = splitString[6];
 
-    const rows = parseInt(splitString[8])
-    const cols = parseInt(splitString[10])
+    const rows = parseInt(splitString[8]);
+    const cols = parseInt(splitString[10]);
 
-    const numHClues = parseInt(splitString[12])
-    const numVClues = parseInt(splitString[14])
+    const numHClues = parseInt(splitString[12]);
+    const numVClues = parseInt(splitString[14]);
 
-    let board = []
-    let hCluesText = []
-    let vCluesText = []
+    let board = [];
+    let hCluesText = [];
+    let vCluesText = [];
 
     for (let i = 0; i < rows; i++) {
-        board.push(splitString[16+i].replace(/%/g, "").split(''))
+        board.push(splitString[16+i].replace(/%/g, "").split(''));
     }
 
     for (let i = 0; i < numHClues; i++) {
-        hCluesText.push(splitString[17+rows+i])
+        hCluesText.push(splitString[17+rows+i]);
     }
 
     for (let i = 0; i < numVClues; i++) {
-        vCluesText.push(splitString[18+rows+numHClues+i])
+        vCluesText.push(splitString[18+rows+numHClues+i]);
     }
 
-    let clueNum = 0
-    let hClueCount = -1
-    let vClueCount = -1
-    let boardData = []
-    let hClues = []
-    let vClues = []
+    let clueNum = 0;
+    let hClueCount = -1;
+    let vClueCount = -1;
+    let boardData = [];
+    let hClues = [];
+    let vClues = [];
 
     board.map((row, rowIndex) => {
-        let rowData = []
+        let rowData = [];
         {row.map((square, colIndex) => {
-            let isInput = square != "#"
-            let isVStart = isInput && (rowIndex === 0 || board[rowIndex-1][colIndex] === "#")
-            let isHStart = isInput && (colIndex === 0 || board[rowIndex][colIndex-1] === "#")
+            let isInput = square != "#";
+            let isVStart = isInput && (rowIndex === 0 || board[rowIndex-1][colIndex] === "#");
+            let isHStart = isInput && (colIndex === 0 || board[rowIndex][colIndex-1] === "#");
 
             if (isVStart && isHStart) {
-                clueNum++
-                hClueCount++
-                vClueCount++
+                clueNum++;
+                hClueCount++;
+                vClueCount++;
 
                 hClues.push(
                     /** @type {module:crosswordData~Clue} */
@@ -121,7 +121,7 @@ export function getCrosswordData(dataString) {
                         row: rowIndex,
                         col: colIndex
                     }
-                })
+                });
                 vClues.push({
                     clueNum: clueNum,
                     clueText: vCluesText[vClueCount],
@@ -129,11 +129,11 @@ export function getCrosswordData(dataString) {
                         row: rowIndex,
                         col: colIndex
                     }
-                })
+                });
             }
             else if (isVStart) {
-                clueNum++
-                vClueCount++
+                clueNum++;
+                vClueCount++;
 
                 vClues.push({
                     clueNum: clueNum,
@@ -142,11 +142,11 @@ export function getCrosswordData(dataString) {
                         row: rowIndex,
                         col: colIndex
                     }
-                })
+                });
             }
             else if (isHStart) {
-                clueNum++
-                hClueCount++
+                clueNum++;
+                hClueCount++;
 
                 hClues.push({
                     clueNum: clueNum,
@@ -155,7 +155,7 @@ export function getCrosswordData(dataString) {
                         row: rowIndex,
                         col: colIndex
                     }
-                })
+                });
             }
 
             rowData.push(
@@ -167,10 +167,10 @@ export function getCrosswordData(dataString) {
                     hClueNum: isInput ? (isHStart ? hClueCount : rowData[rowData.length-1].hClueNum) : -1,
                     vClueNum: isInput ? (isVStart ? vClueCount : boardData[boardData.length-1][colIndex].vClueNum) : -1,
                 }
-            )
+            );
         })}
-        boardData.push(rowData)
-    })
+        boardData.push(rowData);
+    });
 
     return {
         id: id,
@@ -179,5 +179,7 @@ export function getCrosswordData(dataString) {
         board: boardData,
         hClues: hClues,
         vClues: vClues
-    }
+    };
 }
+
+module.exports = { getUrl, getDataString, getCrosswordData }
