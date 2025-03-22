@@ -33,9 +33,18 @@ app.get('/api/getCrosswordData', function(req, res) {
 // Socket.io setup
 io.on('connection', (socket) => {
 	console.log('A user connected');
-  
-	// Handle real-time events here
-	// Example: socket.on('chat message', (message) => { ... });
+
+	const gameId = socket.request._query['gameId'];
+	console.log('Game id: ' + gameId);
+	socket.join(gameId);
+
+	socket.on('click', (message) => {
+		socket.to(gameId).emit('click', message);
+	});
+
+	socket.on('input', (message) => {
+		socket.to(gameId).emit('input', message);
+	})
   
 	socket.on('disconnect', () => {
 	  console.log('A user disconnected');

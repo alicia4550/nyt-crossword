@@ -12,9 +12,6 @@ import ActionsHeader from "./components/ActionsHeader"
 import WinModal from "./components/WinModal"
 import ShareModal from "./components/ShareModal";
 
-const socket = io("http://localhost:3000");
-socket.connect();
-
 /**
  * Module to render all DOM elements and maintain state variables
  * @module app
@@ -46,6 +43,7 @@ export default function App() {
 	 * @returns {module:app~GameIdSetter} function to set new game id
 	 */
 	const [gameId, setGameId] = React.useState(urlParams.get('gameId'));
+	// console.log(gameId);
 
 	/** 
 	 * @typedef CrosswordData
@@ -237,6 +235,44 @@ export default function App() {
 			});
 		}
 	}, []);
+
+	const [socket, setSocket] = React.useState(null);
+
+	React.useEffect(() => {
+		if (gameId !== null) {
+			const newSocket = io("http://localhost:3000", { query: "gameId=" + gameId });
+			setSocket(newSocket);
+			newSocket.connect();
+
+			newSocket.on('input', (message) => {
+				if (timer.start === null) {
+					setTimer((prevTimer) => {
+						return {
+							...prevTimer,
+							start: message.timer.start
+						}
+					});
+				}
+				setGameState(prevGameState => {
+					console.log(message);
+					let newPlayerBoard = [...prevGameState.playerBoard]
+					newPlayerBoard[message.row][message.col] = message.value
+					let newBoardStyling = [...prevGameState.boardStyling]
+					newBoardStyling[message.row][message.col] = "black"
+
+					return {
+						...prevGameState,
+						playerBoard: newPlayerBoard,
+						boardStyling: newBoardStyling
+					}
+				});
+			});
+
+			if (socket !== null) {
+				return socket.disconnect();
+			}
+		}
+	}, [gameId]);
 	
 	/**
 	 * Handle click events on crossword board
@@ -257,7 +293,7 @@ export default function App() {
 				isHorizontal: newIsHorizontal,
 				activeClue: board[prevGameState.activeSquare.row][prevGameState.activeSquare.col][clueNum]
 			}
-		})
+		});
 	}
 
 	/**
@@ -274,7 +310,13 @@ export default function App() {
 				...prevGameState, 
 				activeSquare: {row: row, col: col}
 			}
-		})
+		});
+
+		socket.emit('click', {
+			row: row,
+			col: col,
+			isHorizontal: gameState.isHorizontal
+		});
 	}
 
 	/**
@@ -305,9 +347,17 @@ export default function App() {
 			return {
 				...prevGameState,
 				playerBoard: newPlayerBoard,
+				boardStyling: newBoardStyling,
 				activeSquare: newActiveSquare
 			}
-		})
+		});
+
+		socket.emit('input', {
+			row: parseInt(row),
+			col: parseInt(col),
+			value: event.target.value.toUpperCase(),
+			timer: timer
+		});
 	}
 
 	/**
@@ -336,6 +386,7 @@ export default function App() {
 				}
 			})
 		}
+		
 	}
 
 	/**
