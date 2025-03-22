@@ -64,7 +64,7 @@ export default function ActionsHeader(props) {
                 <div style={{float: "left", width: "100px", marginTop: "8px", textAlign: "center"}}>
                     <div className="nav-item" style={{fontSize: "1.5em"}}>{props.timer.time.hours}:{props.timer.time.mins.toString().padStart(2, "0")}:{props.timer.time.secs.toString().padStart(2, "0")}</div>
                 </div>
-                <button className="nav-item">
+                <button className="nav-item" onClick={props.shareGame}>
                     <FontAwesome
                         name='user-plus'
                         size='2x'

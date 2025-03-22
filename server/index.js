@@ -3,6 +3,7 @@ const crosswordDataUtils = require('./crosswordDataUtils.js');
 const express = require("express");
 const { createServer } = require('node:http');
 const { Server } = require("socket.io");
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,10 @@ const io = new Server(server, {
 
 server.listen(port, () => {
 	console.log(`Example app listening on port ${port}!`);
+});
+
+app.get('/api/getGameId', function(req, res) {
+	res.json({id: uuidv4()});
 });
 
 app.get('/api/getCrosswordData', function(req, res) {

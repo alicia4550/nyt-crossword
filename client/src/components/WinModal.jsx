@@ -36,8 +36,8 @@ export default function WinModal(props) {
 
     return (
         <div className="win-modal" style={style}>
-            <div className="win-modal-header">
-                <button className="win-modal-close" onClick={hideModal}>
+            <div className="modal-header">
+                <button className="modal-close" onClick={hideModal}>
                     <FontAwesome
                         name='times'
                         size='2x'

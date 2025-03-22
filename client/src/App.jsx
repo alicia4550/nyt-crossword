@@ -1,8 +1,6 @@
 import React, { useEffect } from "react"
 import io from 'socket.io-client';
 
-// import "https://cdn.socket.io/4.8.1/socket.io.min.js"
-
 import './App.css'
 
 import ClueHeader from "./components/ClueHeader"
@@ -12,8 +10,8 @@ import ClueSidebar from "./components/ClueSidebar"
 import ByText from "./components/ByText"
 import ActionsHeader from "./components/ActionsHeader"
 import WinModal from "./components/WinModal"
+import ShareModal from "./components/ShareModal";
 
-// const socket = io("http://localhost:3000");
 const socket = io("http://localhost:3000");
 socket.connect();
 
@@ -33,6 +31,22 @@ socket.connect();
  * @returns {React.ReactElement} App React component to be rendered in the DOM
  */
 export default function App() {
+	const urlParams = new URLSearchParams(window.location.search);
+	/**
+	 * @callback GameIdSetter
+	 * @param {string} gameId id of game being played (allows for multiplayer solving)
+	 * @returns {void}
+	 */
+	/**
+	 * Set game id
+	 * @member app
+	 * @function React.useState
+	 * @param {string} gameId id of game being played (allows for multiplayer solving)
+	 * @returns {string} id of game being played (allows for multiplayer solving)
+	 * @returns {module:app~GameIdSetter} function to set new game id
+	 */
+	const [gameId, setGameId] = React.useState(urlParams.get('gameId'));
+
 	/** 
 	 * @typedef CrosswordData
 	 * @property {string} id id string of crossword puzzle
@@ -158,6 +172,21 @@ export default function App() {
 	 */
 	const [win, setWin] = React.useState(false)
 
+	/**
+	 * @callback ShareSetter
+	 * @param {boolean} share whether the share modal is opened
+	 * @returns {void}
+	 */
+	/**
+	 * Set share state
+	 * @member app
+	 * @function React.useState
+	 * @param {boolean} share true if share modal is opened, false if share modal is hidden/closed
+	 * @returns {boolean} whether the share modal is opened
+	 * @returns {module:app~ShareSetter} function to set new share state
+	 */
+	const [share, setShare] = React.useState(false)
+
 	/** @type {Array.<React.MutableRefObject>} */
 	const hClueRef = React.useRef([])
 	/** @type {Array.<React.MutableRefObject>} */
@@ -199,8 +228,16 @@ export default function App() {
 				};
 			})
 		});
-	}, []);
 
+		if (gameId === null) {
+			fetch("/api/getGameId")
+			.then((res) => res.json())
+			.then((data) => {
+				setGameId(data.id);
+			});
+		}
+	}, []);
+	
 	/**
 	 * Handle click events on crossword board
 	 * @member app
@@ -683,6 +720,16 @@ export default function App() {
 	};
 
 	/**
+	 * Open share modal
+	 * @member app
+	 * @function shareGame
+	 * @returns {void}
+	 */
+	function shareGame() {
+		setShare(true);
+	}
+
+	/**
 	 * Set timer that counts every second
 	 * @callback setTimerFunction
 	 * @returns {function} callback function that cancels the timer
@@ -746,6 +793,7 @@ export default function App() {
 			<ActionsHeader
 				crosswordData={crosswordData}
 				timer={timer}
+				shareGame={shareGame}
 				clearBoard={clearBoard}
 				revealLetter={revealLetter}
 				revealWord={revealWord}
@@ -787,6 +835,7 @@ export default function App() {
 				/>
 			</div>
 			{win && <WinModal time={timer.time} />}
+			{share && <ShareModal gameId={gameId} />}
 			</>
 			}
 		</>
