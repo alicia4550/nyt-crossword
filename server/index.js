@@ -38,15 +38,43 @@ io.on('connection', (socket) => {
 	console.log('Game id: ' + gameId);
 	socket.join(gameId);
 
-	socket.on('click', (message) => {
-		socket.to(gameId).emit('click', message);
+	let playerNumber = "player3";
+
+	if (io.sockets.adapter.rooms.get(gameId)) {
+		const numPlayers = io.sockets.adapter.rooms.get(gameId).size;
+		console.log("Players: " + numPlayers);
+
+		if (numPlayers < 3) {
+			playerNumber = "player" + numPlayers;
+		}
+	}
+
+	socket.emit('getPlayerNumber', playerNumber);
+
+	socket.on('playerMove', (message) => {
+		socket.to(gameId).emit('playerMove', {
+			playerNumber: playerNumber,
+			playerState: {
+				...message.playerState,
+				isActive: true
+			}
+		});
 	});
 
 	socket.on('input', (message) => {
 		socket.to(gameId).emit('input', message);
-	})
+	});
+
+	socket.on('revealWord', (message) => {
+		socket.to(gameId).emit('revealWord', message);
+	});
+
+	socket.on('revealGrid', (message) => {
+		socket.to(gameId).emit('revealGrid', message);
+	});
   
 	socket.on('disconnect', () => {
 	  console.log('A user disconnected');
+	  socket.to(gameId).emit('playerDisconnect', playerNumber);
 	});
 });

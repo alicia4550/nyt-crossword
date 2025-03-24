@@ -22,75 +22,89 @@ import Square from "./Square"
  * @example
  * const board = [[...], ...]
 const [gameState, setGameState] = React.useState({
-    activeSquare: {
-        row: 0,
-        col: 0
-    },
-    activeClue: 0,
-    isHorizontal: true,
-    playerBoard: [[...], ...],
-    boardStyling: [[...], ...]
+	activeSquare: {
+		row: 0,
+		col: 0
+	},
+	activeClue: 0,
+	isHorizontal: true,
+	playerBoard: [[...], ...],
+	boardStyling: [[...], ...]
 })
 const clueRef = React.useRef([])
 const clues = [...]
 ...
 <Crossword 
-    board={board}
-    gameState={gameState}
-    handleClick={handleClick}
-    handleInput={handleInput}
-    handleFocus={handleFocus}
-    handleBackspace={handleBackspace}
-    boardRef={boardRef}
-    win={win}
+	board={board}
+	gameState={gameState}
+	handleClick={handleClick}
+	handleInput={handleInput}
+	handleFocus={handleFocus}
+	handleBackspace={handleBackspace}
+	boardRef={boardRef}
+	win={win}
 />
  * @returns {React.ReactElement} Crossword React component to be rendered in the DOM
  */
 
 export default function Crossword(props) {
-    const style = {
-        display: "grid",
-        gridTemplateColumns: `repeat(${props.board[0].length.toString()}, 1fr)`,
-        gridTemplateRows: `repeat(${props.board.length.toString()}, 1fr)`,
-        gridGap: "5px"
-    }
+	function isActive(playerNumber, row, col) {
+		if (Object.keys(props.playerStates[playerNumber]).length === 0 || !props.playerStates[playerNumber].isActive) return false;
+		return row === props.playerStates[playerNumber].activeSquare.row && col === props.playerStates[playerNumber].activeSquare.col;
+	}
 
-    return (
-        <div className="grid-container" style={style}>
-            {props.board.map((row, rowIndex) => {
-                return (
-                    <React.Fragment key={"row-"+rowIndex}>
-                        {row.map((square, colIndex) => {
-                            return (
-                                !square.isInput ? 
-                                <div key={"col-"+colIndex}
-                                    style={{backgroundColor: "black"}}
-                                >
-                                </div> :
-                                <Square
-                                    key={"col-"+colIndex}
-                                    input={props.gameState.playerBoard[rowIndex][colIndex]}
-                                    isStart={square.isStart} 
-                                    clueNum={square.clueNum}
-                                    hClueNum={square.hClueNum}
-                                    vClueNum={square.vClueNum}
-                                    row={rowIndex} 
-                                    col={colIndex}
-                                    isActive={rowIndex === props.gameState.activeSquare.row && colIndex === props.gameState.activeSquare.col}
-                                    isActiveClue={(props.gameState.isHorizontal && props.gameState.activeClue === square.hClueNum) || (!props.gameState.isHorizontal && props.gameState.activeClue === square.vClueNum)}
-                                    handleClick={props.handleClick}
-                                    handleInput={props.handleInput}
-                                    handleFocus={props.handleFocus}
-                                    handleBackspace={props.handleBackspace}
-                                    boardRef={props.boardRef}
-                                    textColour={props.gameState.boardStyling[rowIndex][colIndex]}
-                                    win={props.win}
-                                />
-                            )
-                        })}
-                    </React.Fragment>
-                )
-            })}
-        </div>
-    )
+	function isActiveClue(playerNumber, hClueNum, vClueNum) {
+		if (Object.keys(props.playerStates[playerNumber]).length === 0 || !props.playerStates[playerNumber].isActive) return false;
+		return (props.playerStates[playerNumber].isHorizontal && props.playerStates[playerNumber].activeClue === hClueNum) || (!props.playerStates[playerNumber].isHorizontal && props.playerStates[playerNumber].activeClue === vClueNum)
+	}
+
+	const style = {
+		display: "grid",
+		gridTemplateColumns: `repeat(${props.board[0].length.toString()}, 1fr)`,
+		gridTemplateRows: `repeat(${props.board.length.toString()}, 1fr)`,
+		gridGap: "5px"
+	}
+
+	return (
+		<div className="grid-container" style={style}>
+			{props.board.map((row, rowIndex) => {
+				return (
+					<React.Fragment key={"row-"+rowIndex}>
+						{row.map((square, colIndex) => {
+							return (
+								!square.isInput ? 
+								<div key={"col-"+colIndex}
+									style={{backgroundColor: "black"}}
+								>
+								</div> :
+								<Square
+									key={"col-"+colIndex}
+									input={props.gameState.playerBoard[rowIndex][colIndex]}
+									isStart={square.isStart} 
+									clueNum={square.clueNum}
+									hClueNum={square.hClueNum}
+									vClueNum={square.vClueNum}
+									row={rowIndex} 
+									col={colIndex}
+									isPlayer1Active={isActive("player1", rowIndex, colIndex)}
+									isPlayer1ActiveClue={isActiveClue("player1", square.hClueNum, square.vClueNum)}
+									isPlayer2Active={isActive("player2", rowIndex, colIndex)}
+									isPlayer2ActiveClue={isActiveClue("player2", square.hClueNum, square.vClueNum)}
+									isPlayer3Active={isActive("player3", rowIndex, colIndex)}
+									isPlayer3ActiveClue={isActiveClue("player3", square.hClueNum, square.vClueNum)}
+									handleClick={props.handleClick}
+									handleInput={props.handleInput}
+									handleFocus={props.handleFocus}
+									handleBackspace={props.handleBackspace}
+									boardRef={props.boardRef}
+									textColour={props.gameState.boardStyling[rowIndex][colIndex]}
+									win={props.win}
+								/>
+							)
+						})}
+					</React.Fragment>
+				)
+			})}
+		</div>
+	)
 }

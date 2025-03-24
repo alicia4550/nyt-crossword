@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 
 import './App.css'
 
@@ -43,7 +43,6 @@ export default function App() {
 	 * @returns {module:app~GameIdSetter} function to set new game id
 	 */
 	const [gameId, setGameId] = React.useState(urlParams.get('gameId'));
-	// console.log(gameId);
 
 	/** 
 	 * @typedef CrosswordData
@@ -93,11 +92,6 @@ export default function App() {
 
 	/** 
 	 * @typedef GameState
-	 * @property {{row: number, col: number}} activeSquare object containing the row and column numbers of the currently selected square
-	 * @property {number} activeSquare.row row number of active square
-	 * @property {number} activeSquare.col column number of active square
-	 * @property {number} activeClue number of the active clue containing the current active square (with respect to its index in either the horizontal clues or vertical clues arrays)
-	 * @property {boolean} isHorizontal boolean representing if the user is currently looking at the horizontal or vertical clues
 	 * @property {Array.<Array.<string>>} playerBoard 2D array of all user-inputted values of the crossword board
 	 * @property {Array.<Array.<string>>} boardStyling 2D array of the text colors of all squares in the crossword board (representing whether each square is incorrect, revealed, or neither)
 	 */
@@ -115,15 +109,98 @@ export default function App() {
 	 * @returns {module:app~GameStateSetter} function to set new game state
 	 */
 	const [gameState, setGameState] = React.useState({
-		activeSquare: {
-			row: 0,
-			col: 0
-		},
-		activeClue: 0,
-		isHorizontal: true,
 		playerBoard: [],
-		boardStyling: []
+		boardStyling: [],
+		hasInitialized: false
 	})
+
+	/** 
+	 * @typedef PlayerState
+	 * @property {{row: number, col: number}} activeSquare object containing the row and column numbers of the currently selected square
+	 * @property {number} activeSquare.row row number of active square
+	 * @property {number} activeSquare.col column number of active square
+	 * @property {number} activeClue number of the active clue containing the current active square (with respect to its index in either the horizontal clues or vertical clues arrays)
+	 * @property {boolean} isHorizontal boolean representing if the user is currently looking at the horizontal or vertical clues
+	 * @property {boolean} isActive boolean representing if the player number is active (i.e., if a player 2 exists in the game)
+	 */
+	/** 
+	 * @typedef PlayerStates
+	 * @property {module:app~PlayerState} player1 state of player 1
+	 * @property {module:app~PlayerState} player2 state of player 2
+	 * @property {module:app~PlayerState} player3 state of player 3 (any player joined after the first two players is a spectator and does not emit moves)
+	 */
+	/**
+	 * @callback PlayerStatesSetter
+	 * @param {module:app~PlayerStates} playerStates current player states
+	 * @returns {void}
+	 */
+	/**
+	 * Set player states
+	 * @member app
+	 * @function React.useState
+	 * @param {module:app~PlayerStates} playerStates current player states
+	 * @returns {module:app~PlayerStates} current player states
+	 * @returns {module:app~PlayerStatesSetter} function to set new player states
+	 */
+	const [playerStates, setPlayerStates] = React.useState({
+		player1: {
+			activeSquare: {
+				row: 0,
+				col: 0
+			},
+			activeClue: 0,
+			isHorizontal: true,
+			isActive: true
+		},
+		player2: {
+			activeSquare: {
+				row: 0,
+				col: 0
+			},
+			activeClue: 0,
+			isHorizontal: true,
+			isActive: false
+		},
+		player3: {
+			activeSquare: {
+				row: 0,
+				col: 0
+			},
+			activeClue: 0,
+			isHorizontal: true,
+			isActive: false
+		}
+	})
+
+	/**
+	 * @callback SocketSetter
+	 * @param {Socket} socket socket object to interact with server to send player moves for a multiplayer game
+	 * @returns {void}
+	 */
+	/**
+	 * Set socket
+	 * @member app
+	 * @function React.useState
+	 * @param {Socket} socket socket object to interact with server to send player moves for a multiplayer game
+	 * @returns {Socket} socket socket object to interact with server to send player moves for a multiplayer game
+	 * @returns {module:app~SocketSetter} function to set new socket
+	 */
+	const [socket, setSocket] = React.useState(null);
+
+	/**
+	 * @callback PlayerNumberSetter
+	 * @param {string} playerNumber number of player ("player1", "player2", or "player3", assigned in the order that the user has joined the game)
+	 * @returns {void}
+	 */
+	/**
+	 * Set player number
+	 * @member app
+	 * @function React.useState
+	 * @param {string} playerNumber number of player ("player1", "player2", or "player3", assigned in the order that the user has joined the game)
+	 * @returns {string} number of player ("player1", "player2", or "player3", assigned in the order that the user has joined the game)
+	 * @returns {module:app~PlayerNumberSetter} function to set new player number
+	 */
+	const [playerNumber, setPlayerNumber] = React.useState("player1");
 
 	/** 
 	 * @typedef Timer
@@ -218,12 +295,9 @@ export default function App() {
 				});
 			});
 
-			setGameState(prevGameState => {
-				return {
-					...prevGameState,
-					playerBoard: playerBoard,
-					boardStyling: boardStyling
-				};
+			setGameState({
+				playerBoard: playerBoard,
+				boardStyling: boardStyling
 			})
 		});
 
@@ -236,13 +310,48 @@ export default function App() {
 		}
 	}, []);
 
-	const [socket, setSocket] = React.useState(null);
-
 	React.useEffect(() => {
 		if (gameId !== null) {
 			const newSocket = io("http://localhost:3000", { query: "gameId=" + gameId });
 			setSocket(newSocket);
 			newSocket.connect();
+
+			newSocket.on('getPlayerNumber', (message) => {
+				setPlayerNumber(message);
+				setGameState(prevGameState => {
+					return {
+						...prevGameState,
+						hasInitialized: true
+					}
+				});
+				setPlayerStates(prevPlayerStates => {
+					return {
+						...prevPlayerStates,
+						[message]: {
+							...prevPlayerStates[message],
+							isActive: true
+						}
+					}
+				});
+			});
+
+			newSocket.on('playerDisconnect', (message) => {
+				if (playerNumber > message) {
+					setPlayerStates(prevPlayerStates => {
+						return {
+							...prevPlayerStates,
+							[message]: {
+								...prevPlayerStates[message],
+								isActive: false
+							}
+						}
+					})
+					setPlayerNumber(prevPlayerNumber => {
+						const newPlayerNumber = parseInt(prevPlayerNumber.slice(-1)) - 1;
+						return "player" + newPlayerNumber;
+					})
+				}
+			})
 
 			newSocket.on('input', (message) => {
 				if (timer.start === null) {
@@ -254,25 +363,40 @@ export default function App() {
 					});
 				}
 				setGameState(prevGameState => {
-					console.log(message);
 					let newPlayerBoard = [...prevGameState.playerBoard]
 					newPlayerBoard[message.row][message.col] = message.value
 					let newBoardStyling = [...prevGameState.boardStyling]
 					newBoardStyling[message.row][message.col] = "black"
 
 					return {
-						...prevGameState,
 						playerBoard: newPlayerBoard,
 						boardStyling: newBoardStyling
 					}
 				});
 			});
 
+			newSocket.on('playerMove', (message) => {
+				setPlayerStates((prevPlayerStates) => {
+					return {
+						...prevPlayerStates,
+						[message.playerNumber]: message.playerState
+					}
+				});
+			});
+
+			newSocket.on('revealWord', (message) => {
+				revealWord_fromSocket(message);
+			});
+
+			newSocket.on('revealGrid', (message) => {
+				revealGrid_fromSocket();
+			});
+
 			if (socket !== null) {
 				return socket.disconnect();
 			}
 		}
-	}, [gameId]);
+	}, [gameId, board]);
 	
 	/**
 	 * Handle click events on crossword board
@@ -283,17 +407,25 @@ export default function App() {
 	 * @returns {void}
 	 */
 	function handleClick(row, col) {
-		setGameState(prevGameState => {
-			let toggleIsHorizontal = row === prevGameState.activeSquare.row && col === prevGameState.activeSquare.col
-			let newIsHorizontal = toggleIsHorizontal ? !prevGameState.isHorizontal : prevGameState.isHorizontal
+		setPlayerStates(prevPlayerStates => {
+			let toggleIsHorizontal = row === prevPlayerStates[playerNumber].activeSquare.row && col === prevPlayerStates[playerNumber].activeSquare.col
+			let newIsHorizontal = toggleIsHorizontal ? !prevPlayerStates[playerNumber].isHorizontal : prevPlayerStates[playerNumber].isHorizontal
 			let clueNum = newIsHorizontal ? "hClueNum" : "vClueNum"
 			
 			return {
-				...prevGameState,
-				isHorizontal: newIsHorizontal,
-				activeClue: board[prevGameState.activeSquare.row][prevGameState.activeSquare.col][clueNum]
+				...prevPlayerStates,
+				[playerNumber] : {
+					activeSquare: {
+						row: row,
+						col: col
+					},
+					isHorizontal: newIsHorizontal,
+					activeClue: board[row][col][clueNum],
+					isActive: true
+				}
 			}
 		});
+		emitPlayerMove();
 	}
 
 	/**
@@ -305,18 +437,16 @@ export default function App() {
 	 * @returns {void}
 	 */
 	function handleFocus(row, col) {
-		setGameState(prevGameState => {
+		setPlayerStates(prevPlayerStates => {
 			return {
-				...prevGameState, 
-				activeSquare: {row: row, col: col}
+				...prevPlayerStates, 
+				[playerNumber]: {
+					...prevPlayerStates[playerNumber],
+					activeSquare: {row: row, col: col}
+				}
 			}
 		});
-
-		socket.emit('click', {
-			row: row,
-			col: col,
-			isHorizontal: gameState.isHorizontal
-		});
+		emitPlayerMove();
 	}
 
 	/**
@@ -342,13 +472,24 @@ export default function App() {
 			newPlayerBoard[row][col] = event.target.value.toUpperCase()
 			let newBoardStyling = [...prevGameState.boardStyling]
 			newBoardStyling[row][col] = "black"
-			let newActiveSquare = prevGameState.isHorizontal ? getNextHorizontalSquare(prevGameState) : getNextVerticalSquare(prevGameState)
 
 			return {
 				...prevGameState,
 				playerBoard: newPlayerBoard,
-				boardStyling: newBoardStyling,
-				activeSquare: newActiveSquare
+				boardStyling: newBoardStyling
+			}
+		});
+
+		setPlayerStates(prevPlayerStates => {
+			let newActiveSquare = prevPlayerStates[playerNumber].isHorizontal ? getNextHorizontalSquare(prevPlayerStates[playerNumber]) : getNextVerticalSquare(prevPlayerStates[playerNumber])
+			let newIsHorizontal = newActiveSquare.row === 0 && newActiveSquare.col === 0 ? !prevPlayerStates[playerNumber].isHorizontal : prevPlayerStates[playerNumber].isHorizontal
+			return {
+				...prevPlayerStates, 
+				[playerNumber]: {
+					...prevPlayerStates[playerNumber],
+					activeSquare: newActiveSquare,
+					isHorizontal: newIsHorizontal
+				}
 			}
 		});
 
@@ -370,19 +511,25 @@ export default function App() {
 	 */
 	function handleClueClick(index, isHorizontal) {
 		if (isHorizontal) {
-			setGameState(prevGameState => {
+			setPlayerStates(prevPlayerStates => {
 				return {
-					...prevGameState,
-					activeSquare: crosswordData.hClues[index].firstSquare,
-					isHorizontal: true
+					...prevPlayerStates,
+					[playerNumber]: {
+						...prevPlayerStates[playerNumber],
+						activeSquare: crosswordData.hClues[index].firstSquare,
+						isHorizontal: true
+					}
 				}
 			})
 		} else {
-			setGameState(prevGameState => {
+			setPlayerStates(prevPlayerStates => {
 				return {
-					...prevGameState,
-					activeSquare: crosswordData.vClues[index].firstSquare,
-					isHorizontal: false
+					...prevPlayerStates,
+					[playerNumber]: {
+						...prevPlayerStates[playerNumber],
+						activeSquare: crosswordData.vClues[index].firstSquare,
+						isHorizontal: false
+					}
 				}
 			})
 		}
@@ -400,23 +547,48 @@ export default function App() {
 	 */
 	function handleBackspace(event, row, col) {
 		if (event.keyCode === 8) {
+			setPlayerStates(prevPlayerStates => {
+				if (gameState.playerBoard[row][col] == "") {
+					let clues = prevPlayerStates[playerNumber].isHorizontal ? crosswordData.hClues : crosswordData.vClues
+					if (prevPlayerStates[playerNumber].activeSquare.row === clues[prevPlayerStates[playerNumber].activeClue].firstSquare.row
+						&& prevPlayerStates[playerNumber].activeSquare.col === clues[prevPlayerStates[playerNumber].activeClue].firstSquare.col) {
+							return {...prevPlayerStates}
+						}
+					if (prevPlayerStates[playerNumber].isHorizontal) {
+						return {
+							...prevPlayerStates,
+							[playerNumber]: {
+								...prevPlayerStates[playerNumber],
+								activeSquare: {
+									row: row,
+									col: col-1
+								}
+							}
+						}
+					} else {
+						return {
+							...prevPlayerStates,
+							[playerNumber]: {
+								...prevPlayerStates[playerNumber],
+								activeSquare: {
+									row: row-1,
+									col: col
+								}
+							}
+						}
+					}
+				} else {
+					return {...prevPlayerStates}
+				}
+			})
 			setGameState(prevGameState => {
 				if (prevGameState.playerBoard[row][col] == "") {
-					let clues = prevGameState.isHorizontal ? crosswordData.hClues : crosswordData.vClues
-					if (prevGameState.activeSquare.row === clues[prevGameState.activeClue].firstSquare.row
-						&& prevGameState.activeSquare.col === clues[prevGameState.activeClue].firstSquare.col) {
-							return {...prevGameState}
-						}
 					if (prevGameState.isHorizontal) {
 						const prevPlayerBoard = [...gameState.playerBoard]
 						prevPlayerBoard[row][col-1] = ""
 						return {
 							...prevGameState,
 							playerBoard: prevPlayerBoard,
-							activeSquare: {
-								row: row,
-								col: col-1
-							}
 						}
 					} else {
 						const prevPlayerBoard = [...gameState.playerBoard]
@@ -424,10 +596,6 @@ export default function App() {
 						return {
 							...prevGameState,
 							playerBoard: prevPlayerBoard,
-							activeSquare: {
-								row: row-1,
-								col: col
-							}
 						}
 					}
 				} else {
@@ -452,13 +620,13 @@ export default function App() {
 	 */
 	React.useEffect(() => {
 		if (board && board.length > 0) {
-			if (gameState.isHorizontal) {
-				hClueRef.current[gameState.activeClue].scrollIntoView()
+			if (playerStates[playerNumber].isHorizontal) {
+				hClueRef.current[playerStates[playerNumber].activeClue].scrollIntoView()
 			} else {
-				vClueRef.current[gameState.activeClue].scrollIntoView()
+				vClueRef.current[playerStates[playerNumber].activeClue].scrollIntoView()
 			}
 		}
-	}, [gameState.activeClue])
+	}, [playerStates[playerNumber].activeClue])
 
 	/**
 	 * Set active clue according to active square
@@ -475,16 +643,34 @@ export default function App() {
 	*/
 	React.useEffect(() => {
 		if (board && board.length > 0) {
-			boardRef.current[gameState.activeSquare.row][gameState.activeSquare.col].focus()
-			setGameState(prevGameState => {
-				let clueNum = prevGameState.isHorizontal ? "hClueNum" : "vClueNum"
+			boardRef.current[playerStates[playerNumber].activeSquare.row][playerStates[playerNumber].activeSquare.col].focus()
+			setPlayerStates(prevPlayerStates => {
+				let clueNum = prevPlayerStates[playerNumber].isHorizontal ? "hClueNum" : "vClueNum"
 				return {
-					...prevGameState,
-					activeClue: board[prevGameState.activeSquare.row][prevGameState.activeSquare.col][clueNum]
+					...prevPlayerStates,
+					[playerNumber]: {
+						...prevPlayerStates[playerNumber],
+						activeClue: board[prevPlayerStates[playerNumber].activeSquare.row][prevPlayerStates[playerNumber].activeSquare.col][clueNum]
+					}
 				}
 			})
 		}
-	}, [gameState.activeSquare])
+	}, [playerStates[playerNumber].activeSquare])
+
+	/**
+	 * Emit player move (from player state) to server using socket
+	 * @member app
+	 * @function emitPlayerMove
+	 * @returns {void}
+	 */
+	function emitPlayerMove() {
+		if (socket !== null) {
+			socket.emit('playerMove', {
+				playerNumber: playerNumber,
+				playerState: playerStates[playerNumber]
+			});
+		}
+	}
 
 	/**
 	 * Get next empty square (in the horizontal direction) after input
@@ -493,9 +679,9 @@ export default function App() {
 	 * @param {module:app~GameState} gameState current game state
 	 * @returns {{row: number, col: number}} object containing the row and column number of the next horizontal square
 	 */
-	function getNextHorizontalSquare(gameState) {
-		let currentRow = gameState.activeSquare.row
-		let currentCol = gameState.activeSquare.col
+	function getNextHorizontalSquare(playerState) {
+		let currentRow = playerState.activeSquare.row
+		let currentCol = playerState.activeSquare.col
 
 		while (gameState.playerBoard[currentRow][currentCol] != "") {
 			if (currentCol + 1 === gameState.playerBoard[0].length) {
@@ -505,7 +691,7 @@ export default function App() {
 			} else {
 				currentCol++
 			}
-			if (currentRow === gameState.activeSquare.row && currentCol === gameState.activeSquare.col) break
+			if (currentRow === playerState.activeSquare.row && currentCol === playerState.activeSquare.col) break
 		}
 
 		return {
@@ -521,10 +707,10 @@ export default function App() {
 	 * @param {module:app~GameState} gameState current game state
 	 * @returns {{row: number, col: number}} object containing the row and columnn number of the next vertical square
 	 */
-	function getNextVerticalSquare(gameState){
-		let currentRow = gameState.activeSquare.row
-		let currentCol = gameState.activeSquare.col
-		let currentClue = gameState.activeClue
+	function getNextVerticalSquare(playerState){
+		let currentRow = playerState.activeSquare.row
+		let currentCol = playerState.activeSquare.col
+		let currentClue = playerState.activeClue
 
 		const playerBoard = gameState.playerBoard
 
@@ -536,7 +722,7 @@ export default function App() {
 			} else {
 				currentRow++
 			}
-			if (currentRow === gameState.activeSquare.row && currentCol === gameState.activeSquare.col) break
+			if (currentRow === playerState.activeSquare.row && currentCol === playerState.activeSquare.col) break
 		}
 
 		return {
@@ -552,12 +738,9 @@ export default function App() {
 	 * @returns {void}
 	 */
 	function clearBoard() {
-		setGameState(prevGameState => {
-			return {
-				...prevGameState,
-				playerBoard: playerBoard,
-				boardStyling: boardStyling
-			}
+		setGameState({
+			playerBoard: playerBoard,
+			boardStyling: boardStyling
 		})
 	}
 
@@ -568,19 +751,25 @@ export default function App() {
 	 * @returns {void}
 	 */
 	function revealLetter() {
-		const row = gameState.activeSquare.row
-		const col = gameState.activeSquare.col
+		const row = playerStates[playerNumber].activeSquare.row
+		const col = playerStates[playerNumber].activeSquare.col
 		setGameState(prevGameState => {
 			let newPlayerBoard = [...prevGameState.playerBoard]
 			newPlayerBoard[row][col] = board[row][col].value
 			let newBoardStyling = [...prevGameState.boardStyling]
 			newBoardStyling[row][col] = "green"
 			return {
-				...prevGameState,
 				playerBoard: newPlayerBoard,
 				boardStyling: newBoardStyling
 			}
 		})
+
+		socket.emit('input', {
+			row: parseInt(row),
+			col: parseInt(col),
+			value: board[row][col].value,
+			timer: timer
+		});
 	}
 
 	/**
@@ -594,16 +783,16 @@ export default function App() {
 			let newPlayerBoard = [...prevGameState.playerBoard]
 			let newBoardStyling = [...prevGameState.boardStyling]
 
-			let row = gameState.activeSquare.row
-			let col = gameState.activeSquare.col
+			let row = playerStates[playerNumber].activeSquare.row
+			let col = playerStates[playerNumber].activeSquare.col
 
-			if (prevGameState.isHorizontal) {
+			if (playerStates[playerNumber].isHorizontal) {
 				while (col >= 0 && newPlayerBoard[row][col] != "#") {
 					newPlayerBoard[row][col] = board[row][col].value
 					newBoardStyling[row][col] = "green"
 					col--
 				} 
-				col = gameState.activeSquare.col
+				col = playerStates[playerNumber].activeSquare.col
 				while (col < board[0].length && newPlayerBoard[row][col] != "#") {
 					newPlayerBoard[row][col] = board[row][col].value
 					newBoardStyling[row][col] = "green"
@@ -615,7 +804,7 @@ export default function App() {
 					newBoardStyling[row][col] = "green"
 					row--
 				} 
-				row = gameState.activeSquare.row
+				row = playerStates[playerNumber].activeSquare.row
 				while (row < board[0].length && newPlayerBoard[row][col] != "#") {
 					newPlayerBoard[row][col] = board[row][col].value
 					newBoardStyling[row][col] = "green"
@@ -624,7 +813,52 @@ export default function App() {
 			}
 
 			return {
-				...prevGameState,
+				playerBoard: newPlayerBoard,
+				boardStyling: newBoardStyling
+			}
+		})
+		socket.emit('revealWord', {
+			row: playerStates[playerNumber].activeSquare.row,
+			col: playerStates[playerNumber].activeSquare.col,
+			isHorizontal: playerStates[playerNumber].isHorizontal
+		});
+	}
+
+	function revealWord_fromSocket(message) {
+		setGameState(prevGameState => {
+			let newPlayerBoard = [...prevGameState.playerBoard]
+			let newBoardStyling = [...prevGameState.boardStyling]
+
+			let row = message.row
+			let col = message.col
+
+			if (message.isHorizontal) {
+				while (col >= 0 && newPlayerBoard[row][col] != "#") {
+					newPlayerBoard[row][col] = board[row][col].value
+					newBoardStyling[row][col] = "black"
+					col--
+				} 
+				col = message.col
+				while (col < board[0].length && newPlayerBoard[row][col] != "#") {
+					newPlayerBoard[row][col] = board[row][col].value
+					newBoardStyling[row][col] = "black"
+					col++
+				} 
+			} else {
+				while (row >= 0 && newPlayerBoard[row][col] != "#") {
+					newPlayerBoard[row][col] = board[row][col].value
+					newBoardStyling[row][col] = "black"
+					row--
+				} 
+				row = message.row
+				while (row < board[0].length && newPlayerBoard[row][col] != "#") {
+					newPlayerBoard[row][col] = board[row][col].value
+					newBoardStyling[row][col] = "black"
+					row++
+				} 
+			}
+
+			return {
 				playerBoard: newPlayerBoard,
 				boardStyling: newBoardStyling
 			}
@@ -650,7 +884,28 @@ export default function App() {
 				})
 			})
 			return {
-				...prevGameState,
+				playerBoard: newPlayerBoard,
+				boardStyling: newBoardStyling
+			}
+		})
+		socket.emit('revealGrid', playerNumber);
+	}
+
+	function revealGrid_fromSocket() {
+		console.log("Board:");
+		console.log(board);
+		setGameState(prevGameState => {
+			let newPlayerBoard = board.map(row => {
+				return row.map(square => {
+					return square.value
+				})
+			})
+			let newBoardStyling = board.map(row => {
+				return row.map(square => {
+					return "black"
+				})
+			})
+			return {
 				playerBoard: newPlayerBoard,
 				boardStyling: newBoardStyling
 			}
@@ -664,8 +919,8 @@ export default function App() {
 	 * @returns {void}
 	 */
 	function checkLetter() {
-		const row = gameState.activeSquare.row
-		const col = gameState.activeSquare.col
+		const row = playerStates[playerNumber].activeSquare.row
+		const col = playerStates[playerNumber].activeSquare.col
 		setGameState(prevGameState => {
 			let newBoardStyling = [...prevGameState.boardStyling]
 			newBoardStyling[row][col] = prevGameState.playerBoard[row][col] != board[row][col].value && prevGameState.playerBoard[row][col] != "" ? "red" : prevGameState.boardStyling[row][col]
@@ -686,8 +941,8 @@ export default function App() {
 		setGameState(prevGameState => {
 			let newBoardStyling = [...prevGameState.boardStyling]
 
-			let row = gameState.activeSquare.row
-			let col = gameState.activeSquare.col
+			let row = playerStates[playerNumber].activeSquare.row
+			let col = playerStates[playerNumber].activeSquare.col
 
 			if (prevGameState.isHorizontal) {
 				while (col >= 0 && gameState.playerBoard[row][col] != "#") {
@@ -696,7 +951,7 @@ export default function App() {
 					}
 					col--
 				} 
-				col = gameState.activeSquare.col
+				col = playerStates[playerNumber].activeSquare.col
 				while (col < board[0].length && gameState.playerBoard[row][col] != "#") {
 					if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
 						newBoardStyling[row][col] = "red"
@@ -710,7 +965,7 @@ export default function App() {
 					}
 					row--
 				} 
-				row = gameState.activeSquare.row
+				row = playerStates[playerNumber].activeSquare.row
 				while (row < board.length && gameState.playerBoard[row][col] != "#") {
 					if (gameState.playerBoard[row][col] != board[row][col].value && gameState.playerBoard[row][col] != "") {
 						newBoardStyling[row][col] = "red"
@@ -853,16 +1108,18 @@ export default function App() {
 				checkWord={checkWord}
 				checkGrid={checkGrid} />
 			<ClueHeader 
-				isHorizontal={gameState.isHorizontal}
-				clue={gameState.isHorizontal ? 
-					crosswordData.hClues[board[gameState.activeSquare.row][gameState.activeSquare.col].hClueNum] : 
-					crosswordData.vClues[board[gameState.activeSquare.row][gameState.activeSquare.col].vClueNum]} 
+				isHorizontal={playerStates[playerNumber].isHorizontal}
+				clue={playerStates[playerNumber].isHorizontal ? 
+					crosswordData.hClues[board[playerStates[playerNumber].activeSquare.row][playerStates[playerNumber].activeSquare.col].hClueNum] : 
+					crosswordData.vClues[board[playerStates[playerNumber].activeSquare.row][playerStates[playerNumber].activeSquare.col].vClueNum]} 
 			/>
 			<div className="crossword-container">
 				<div>
 				<Crossword 
 					board={board}
 					gameState={gameState}
+					playerStates={playerStates}
+					playerNumber={playerNumber}
 					handleClick={handleClick}
 					handleInput={handleInput}
 					handleFocus={handleFocus}
@@ -876,8 +1133,8 @@ export default function App() {
 				/>
 				</div>
 				<ClueSidebar 
-					activeClue={gameState.activeClue}
-					isHorizontal={gameState.isHorizontal}
+					activeClue={playerStates[playerNumber].activeClue}
+					isHorizontal={playerStates[playerNumber].isHorizontal}
 					hClues={crosswordData.hClues}
 					vClues={crosswordData.vClues}
 					hClueRef={hClueRef}
