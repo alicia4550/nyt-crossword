@@ -87,6 +87,7 @@ export default function Square(props) {
 				<p className="clueNumber">{props.clueNum}</p>
 				<input 
 					type="text" id={`${props.row}-${props.col}`} 
+					aria-label={`Row ${props.row}, Column${props.col}`} 
 					value={props.input}
 					style={{color: props.textColour}}
 					maxLength="1" onChange={props.handleInput} 

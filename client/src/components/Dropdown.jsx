@@ -33,7 +33,7 @@ export default function Dropdown(props) {
 
     return (
         <div className="dropdown nav-item">
-            <button onClick={handleOpen} className="dropdown-button">
+            <button onClick={handleOpen} className="dropdown-button" aria-label={props.ariaLabel}>
                 {props.label}
             </button>
             {isOpen &&
